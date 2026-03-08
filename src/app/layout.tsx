@@ -70,7 +70,7 @@ const navbar = (
     children={
       <span className="hidden md:flex items-center gap-2">
         <Link
-          href="https://www.srp-scripts.com"
+          href="https://srp-scripts.com"
           target="_blank"
           rel="noopener noreferrer"
         >
