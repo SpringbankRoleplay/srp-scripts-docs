@@ -33,8 +33,21 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Make English homepage the root homepage
-        run: cp out/en/index.html out/index.html
+      - name: Create .nojekyll file
+        run: touch out/.nojekyll
+
+      - name: List output directory contents
+        run: |
+          echo "Contents of out directory:"
+          ls -la out/
+          echo "Checking for index.html:"
+          if [ -f "out/index.html" ]; then
+            echo "✅ index.html found!"
+            head -n 20 out/index.html
+          else
+            echo "❌ index.html NOT found!"
+            exit 1
+          fi
 
       - name: Upload
         uses: actions/upload-pages-artifact@v3
