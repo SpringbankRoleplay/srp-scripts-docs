@@ -58,27 +58,24 @@ const navbar = (
   <Navbar
     logo={
       <span className="flex items-center gap-2">
-        <Image src="/logo.png" alt="Logo" width={45} height={45} />
-        <h1 className="text-xl font-bold">
-          SRP Scripts
-        </h1>
+        <Image src="/logo.png" alt="" width={45} height={45} />
+        <span className="text-xl font-bold">SRP Scripts</span>
       </span>
     }
     logoLink="/"
     chatLink="https://discord.gg/5H6kG8XAur"
-    projectLink='https://github.com/SpringbankRoleplay/srp-tebex-docs'
-    children={
-      <span className="hidden md:flex items-center gap-2">
-        <Link
-          href="https://srp-scripts.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <FontAwesomeIcon icon={faStore} className="w-6 h-6" />
-        </Link>
-      </span>
-    }
-  />
+    projectLink="https://github.com/SpringbankRoleplay/srp-tebex-docs"
+  >
+    <Link
+      href="https://srp-scripts.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Webshop"
+      className="hidden md:flex items-center"
+    >
+      <FontAwesomeIcon icon={faStore} className="w-5 h-5" />
+    </Link>
+  </Navbar>
 )
 
 const footer = <Footer>{new Date().getFullYear()} © SRP Gaming.</Footer>

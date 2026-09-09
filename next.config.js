@@ -1,21 +1,21 @@
 import nextra from 'nextra'
 
-// Set up Nextra with its configuration
-const withNextra = nextra({
-    // ... Add Nextra-specific options here
-})
+const withNextra = nextra({})
 
-// Export the final Next.js config with Nextra included
+const isProd = process.env.NODE_ENV === 'production'
+
 export default withNextra({
-    output: 'export',
-    skipTrailingSlashRedirect: true,
-    trailingSlash: true,
-    images: {
-        unoptimized: true,
+  ...(isProd && { output: 'export' }),
+  trailingSlash: true,
+  images: { unoptimized: true },
+  turbopack: {
+    resolveAlias: {
+      'next-mdx-import-source-file': './src/mdx-components.tsx',
     },
-    turbopack: {
-        resolveAlias: {
-            'next-mdx-import-source-file': './src/mdx-components.tsx'
-        }
-    },
+  },
+  webpack(config) {
+    config.resolve.alias['next-mdx-import-source-file'] =
+      './src/mdx-components.tsx'
+    return config
+  },
 })
