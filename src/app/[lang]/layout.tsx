@@ -23,14 +23,6 @@ const mono = JetBrains_Mono({
 const SITE_URL = 'https://docs.srp-scripts.com'
 const REPO = 'https://github.com/SpringbankRoleplay/srp-scripts-docs'
 
-const locales = [
-  { locale: 'en', name: 'English' },
-  { locale: 'nl', name: 'Nederlands' },
-]
-
-export function generateStaticParams() {
-  return locales.map(({ locale }) => ({ lang: locale }))
-}
 
 export const metadata = {
   title: {
@@ -123,7 +115,7 @@ export default async function RootLayout({
           banner={banner}
           navbar={navbar}
           footer={footer}
-          pageMap={await getPageMap(lang)}
+          pageMap={await getPageMap(`/${lang}`)}
           docsRepositoryBase={`${REPO}/tree/main`}
           sidebar={{ defaultMenuCollapseLevel: 1, toggleButton: true }}
           toc={{ backToTop: null, float: true }}
