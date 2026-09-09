@@ -16,7 +16,7 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "postbuild": "pagefind --site .next/server/app --output-path out/_pagefind && touch out/.nojekyll"
+    "postbuild": "pagefind --site .next/server/app --output-path out/_pagefind && node scripts/root-mirror.mjs"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.3.1",

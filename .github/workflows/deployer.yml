@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -30,11 +32,11 @@ jobs:
 
       - name: Verify export
         run: |
-          test -f out/index.html || { echo "missing out/index.html — is public/index.html present?"; exit 1; }
+          test -f out/index.html    || { echo "root mirror missing — postbuild failed"; exit 1; }
           test -f out/en/index.html || { echo "missing out/en/"; exit 1; }
-          test -f out/nl/index.html || { echo "missing out/nl/ — check generateStaticParams"; exit 1; }
-          test -d out/_pagefind || { echo "missing out/_pagefind — pagefind postbuild failed"; exit 1; }
-      
+          test -f out/nl/index.html || { echo "missing out/nl/"; exit 1; }
+          test -d out/_pagefind     || { echo "pagefind failed"; exit 1; }
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
