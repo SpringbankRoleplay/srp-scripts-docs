@@ -1,36 +1,61 @@
-import clsx from "clsx";
+import clsx from 'clsx'
+import { Info, CircleCheck, TriangleAlert, CircleX } from 'lucide-react'
 
-type CalloutProps = {
-  type?: "info" | "success" | "warning" | "error";
-  title?: string;
-  children: React.ReactNode;
-};
+type Type = 'info' | 'success' | 'warning' | 'error'
 
-const styles = {
-  info: "border-blue-500/40 bg-blue-500/10 text-blue-900 dark:text-blue-200",
-  success:
-    "border-green-500/40 bg-green-500/10 text-green-900 dark:text-green-200",
-  warning:
-    "border-yellow-500/40 bg-yellow-500/10 text-yellow-900 dark:text-yellow-200",
-  error: "border-red-500/40 bg-red-500/10 text-red-900 dark:text-red-200",
-};
+const styles: Record<Type, string> = {
+  info: 'border-l-srp-accent bg-srp-accent/[0.07]',
+  success: 'border-l-green-500 bg-green-500/[0.07]',
+  warning: 'border-l-yellow-500 bg-yellow-500/[0.07]',
+  error: 'border-l-red-500 bg-red-500/[0.07]',
+}
+
+const iconColor: Record<Type, string> = {
+  info: 'text-srp-accent-hover',
+  success: 'text-green-400',
+  warning: 'text-yellow-400',
+  error: 'text-red-400',
+}
+
+const icons: Record<Type, React.ElementType> = {
+  info: Info,
+  success: CircleCheck,
+  warning: TriangleAlert,
+  error: CircleX,
+}
 
 export function Callout({
-  type = "info",
+  type = 'info',
   title,
   children,
-}: CalloutProps) {
+}: {
+  type?: Type
+  title?: string
+  children: React.ReactNode
+}) {
+  const Icon = icons[type]
+
   return (
     <div
       className={clsx(
-        "my-6 rounded-lg border-l-4 p-4",
-        styles[type]
+        'my-6 flex gap-3 rounded-r-lg border border-srp-border border-l-2 p-3.5',
+        styles[type],
       )}
     >
-      {title && (
-        <div className="mb-1 font-semibold">{title}</div>
-      )}
-      <div className="text-sm leading-relaxed">{children}</div>
+      <Icon
+        className={clsx('mt-0.5 h-4 w-4 shrink-0', iconColor[type])}
+        aria-hidden
+      />
+      <div className="min-w-0">
+        {title && (
+          <div className="mb-1 text-sm font-semibold text-srp-text">
+            {title}
+          </div>
+        )}
+        <div className="text-sm leading-relaxed text-srp-text/90 [&>:first-child]:mt-0 [&>:last-child]:mb-0">
+          {children}
+        </div>
+      </div>
     </div>
-  );
+  )
 }

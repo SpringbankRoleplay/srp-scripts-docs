@@ -1,33 +1,91 @@
-import Link from "next/link";
+import Link from 'next/link'
+import clsx from 'clsx'
+import { ArrowUpRight } from 'lucide-react'
 
 type CardProps = {
-  title: string;
-  description: string;
-  href?: string;
-};
-
-export function Card({ title, description, href }: CardProps) {
-  const Component = href ? Link : "div";
-
-  return (
-    <Component
-      href={href as any}
-      className="group block rounded-xl border border-zinc-200 bg-white p-5 transition hover:border-zinc-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
-    >
-      <h3 className="mb-1 text-base font-semibold group-hover:underline">
-        {title}
-      </h3>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
-        {description}
-      </p>
-    </Component>
-  );
+  title: string
+  description?: string
+  href?: string
+  badge?: React.ReactNode
+  icon?: React.ReactNode
+  children?: React.ReactNode
 }
 
-export function CardGrid({ children }: { children: React.ReactNode }) {
+export function Card({
+  title,
+  description,
+  href,
+  badge,
+  icon,
+  children,
+}: CardProps) {
+  const external = href?.startsWith('http')
+
+  const inner = (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          {icon && <span className="text-srp-dim">{icon}</span>}
+          <span className="font-mono text-[15px] font-semibold text-srp-text">
+            {title}
+          </span>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {badge}
+          {external && (
+            <ArrowUpRight
+              className="h-3.5 w-3.5 text-srp-dim transition-transform group-hover:-translate-y-px group-hover:translate-x-px"
+              aria-hidden
+            />
+          )}
+        </div>
+      </div>
+      {description && (
+        <p className="mt-2 text-sm leading-relaxed text-srp-dim">
+          {description}
+        </p>
+      )}
+      {children && <div className="mt-3">{children}</div>}
+    </>
+  )
+
+  const classes = clsx(
+    'group block rounded-xl border border-srp-border bg-srp-surface p-4',
+    'no-underline transition-colors',
+    href && 'hover:border-srp-accent/40 hover:bg-srp-raised',
+  )
+
+  if (!href) {
+    return <div className={classes}>{inner}</div>
+  }
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <Link
+      href={href}
+      className={classes}
+      {...(external && { target: '_blank', rel: 'noopener noreferrer' })}
+    >
+      {inner}
+    </Link>
+  )
+}
+
+export function CardGrid({
+  children,
+  columns = 2,
+}: {
+  children: React.ReactNode
+  columns?: 1 | 2 | 3
+}) {
+  return (
+    <div
+      className={clsx(
+        'my-6 grid gap-3',
+        columns === 2 && 'sm:grid-cols-2',
+        columns === 3 && 'sm:grid-cols-2 lg:grid-cols-3',
+      )}
+    >
       {children}
     </div>
-  );
+  )
 }

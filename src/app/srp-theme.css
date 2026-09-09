@@ -1,0 +1,276 @@
+/* SRP Scripts — Nextra docs theme
+   Import in globals.css AFTER nextra-theme-docs/style.css.
+   Tokens live in the @theme block in globals.css. */
+
+:root {
+  --nextra-primary-hue: 217deg;
+  --nextra-primary-saturation: 91%;
+  --nextra-primary-lightness: 60%;
+  --nextra-content-width: 78rem;
+}
+
+.dark {
+  --nextra-bg: 10, 12, 16; /* keep in sync with --color-srp-bg */
+}
+
+/* ---- Base ------------------------------------------------------------- */
+
+body {
+  background: var(--color-srp-bg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+pre,
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* ---- Type scale ------------------------------------------------------- */
+
+.dark h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.75rem;
+}
+
+.dark h2 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  border-top: 1px solid var(--color-srp-border);
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+}
+
+.dark h3 {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+}
+
+/* Comfortable measure — long lines are the main readability killer */
+.nextra-content p,
+.nextra-content li {
+  max-width: 68ch;
+  line-height: 1.7;
+}
+
+/* ---- Navbar ----------------------------------------------------------- */
+
+.dark .nextra-navbar {
+  background: color-mix(in srgb, var(--color-srp-bg) 85%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-srp-border);
+}
+
+.dark .nextra-navbar a:hover {
+  color: var(--color-srp-accent-hover);
+}
+
+/* ---- Sidebar ---------------------------------------------------------- */
+
+/* Eén achtergrond, geen tweede laag eroverheen */
+.dark .nextra-sidebar,
+.dark .nextra-sidebar-container {
+  background: transparent;
+}
+
+.dark .nextra-sidebar-container {
+  border-right: 1px solid var(--color-srp-border);
+}
+
+.dark .nextra-sidebar a {
+  font-size: 0.8125rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 6px;
+  color: var(--color-srp-dim);
+  font-weight: 400;
+  transition: color 0.12s, background 0.12s;
+}
+
+.dark .nextra-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-srp-text);
+}
+
+/* Actief: alleen tekstkleur en een dunne markering, geen gevuld blok */
+.dark .nextra-sidebar a[aria-current='true'],
+.dark .nextra-sidebar li.active > a {
+  background: transparent;
+  color: var(--color-srp-accent-hover);
+  font-weight: 500;
+  box-shadow: inset 2px 0 0 var(--color-srp-accent);
+}
+
+/* Onderbalk met theme-switcher */
+.dark .nextra-sidebar-footer {
+  background: transparent;
+  border-top: 1px solid var(--color-srp-border);
+}
+
+/* ---- Table of contents ------------------------------------------------ */
+
+.dark .nextra-toc {
+  font-size: 0.8125rem;
+}
+
+.dark .nextra-toc a {
+  color: var(--color-srp-dim);
+}
+
+.dark .nextra-toc a:hover {
+  color: var(--color-srp-text);
+}
+
+/* ---- Code ------------------------------------------------------------- */
+
+.dark .nextra-code pre {
+  background: var(--color-srp-surface) !important;
+  border: 1px solid var(--color-srp-border);
+  border-radius: 8px;
+}
+
+.dark .nextra-code > div:first-child {
+  background: var(--color-srp-raised);
+  border: 1px solid var(--color-srp-border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  color: var(--color-srp-dim);
+  font-size: 0.75rem;
+}
+
+.dark code:not(pre code) {
+  background: var(--color-srp-raised);
+  border: 1px solid var(--color-srp-border);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  color: var(--color-srp-text);
+}
+
+/* ---- Tables ----------------------------------------------------------- */
+
+.dark table {
+  border: 1px solid var(--color-srp-border);
+  border-radius: 8px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+.dark th {
+  background: var(--color-srp-raised);
+  color: var(--color-srp-dim);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  text-align: left;
+}
+
+.dark td,
+.dark th {
+  border-color: var(--color-srp-border);
+  padding: 0.625rem 0.875rem;
+}
+
+/* ---- Callouts --------------------------------------------------------- */
+
+.dark .nextra-callout {
+  border-radius: 8px;
+  border-width: 1px;
+  border-left-width: 3px;
+  font-size: 0.9375rem;
+}
+
+/* ---- Steps ------------------------------------------------------------ */
+/* Keep step headings out of the visual h3 rhythm — they're a sequence,
+   not document structure. */
+
+.dark .nextra-steps h3 {
+  font-size: 1rem;
+  margin-top: 0;
+}
+
+/* ---- Server status dot ------------------------------------------------ */
+
+.srp-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-srp-dim);
+}
+
+.srp-status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-srp-online);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-srp-online) 20%, transparent);
+}
+
+/* ---- Search ----------------------------------------------------------- */
+
+.dark .nextra-search input {
+  background: var(--color-srp-surface);
+  border: 1px solid var(--color-srp-border);
+  border-radius: 8px;
+}
+
+.dark .nextra-search input:focus {
+  border-color: var(--color-srp-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-srp-accent) 20%, transparent);
+}
+
+/* ---- Accessibility ---------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--color-srp-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- Banner ----------------------------------------------------------- */
+
+.dark .nextra-banner {
+  background: var(--color-srp-surface);
+  border-bottom: 1px solid var(--color-srp-border);
+  color: var(--color-srp-dim);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  height: 2.25rem;
+}
+
+/* Accent alleen op het label, niet op de hele balk */
+.dark .nextra-banner a {
+  color: var(--color-srp-accent-hover);
+  text-decoration: none;
+}
+
+.dark .nextra-banner a:hover {
+  text-decoration: underline;
+}
+
+/* Sluitknop rustiger */
+.dark .nextra-banner button {
+  color: var(--color-srp-dim);
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.dark .nextra-banner button:hover {
+  opacity: 1;
+}

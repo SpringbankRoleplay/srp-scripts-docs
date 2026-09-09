@@ -1,110 +1,123 @@
-// Nextra
 import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { Banner, Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
-
-// Next
+import { Inter, JetBrains_Mono } from 'next/font/google'
 import Image from 'next/image'
-import Link from "next/link";
-
-//Style
-import './globals.css'
+import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faStore } from '@fortawesome/free-solid-svg-icons'
 
+import './globals.css'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const mono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+})
+
+const SITE_URL = 'https://docs.srp-scripts.com'
+const REPO = 'https://github.com/SpringbankRoleplay/srp-scripts-docs'
+
 export const metadata = {
-  // Define your metadata here
-  // For more information on the Metadata API, see:
-  // https://nextjs.org/docs/app/building-your-application/optimizing/metadata
-
-  title: "SRP Gaming - Documentation",
-  description: "Official documentation for SRP Gaming scripts",
-
-  metadataBase: new URL("https://docs.srp-scripts.com"),
-
+  title: {
+    default: 'SRP Scripts',
+    template: '%s – SRP Scripts',
+  },
+  description: 'Documentation for the FiveM resources by SRP Gaming.',
+  metadataBase: new URL(SITE_URL),
   openGraph: {
-    type: "website",
-    url: "https://docs.srp-scripts.com",
-    title: "SRP Gaming - Documentation",
-    description: "Official documentation for SRP Gaming scripts",
-    images: [
-      {
-        url: "/logo.png",
-        width: 1200,
-        height: 630,
-        alt: "SRP Gaming Docs",
-      },
-    ],
+    type: 'website',
+    url: SITE_URL,
+    siteName: 'SRP Scripts',
+    locale: 'en_US',
+    title: 'SRP Scripts',
+    description: 'Documentation for the FiveM resources by SRP Gaming.',
+    images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'SRP Scripts' }],
   },
-
   twitter: {
-    card: "summary_large_image",
-    title: "SRP Gaming - Documentation",
-    description: "Official documentation for SRP Gaming scripts",
-    images: ["https://docs.srp-scripts.com/logo.png"],
+    card: 'summary_large_image',
+    title: 'SRP Scripts',
+    description: 'Documentation for the FiveM resources by SRP Gaming.',
+    images: ['/logo.png'],
   },
-};
+}
 
 const banner = (
-  <Banner
-    storageKey="springbank-scripts-betarelease"
-    className="bg-blue-400"
-  >
-    Springbank - Scripts | Beta Release🎉
+  <Banner storageKey="srp-scripts-beta">
+    <span className="flex items-center justify-center gap-2">
+      <span className="rounded bg-srp-accent/15 px-1.5 py-0.5 text-[11px] font-medium text-srp-accent-hover ring-1 ring-inset ring-srp-accent/25">
+        Beta
+      </span>
+      <span>Docs are still being written — some pages are incomplete.</span>
+    </span>
   </Banner>
 )
 
 const navbar = (
   <Navbar
     logo={
-      <span className="flex items-center gap-2">
-        <Image src="/logo.png" alt="" width={45} height={45} />
-        <span className="text-xl font-bold">SRP Scripts</span>
+      <span className="flex items-center gap-2.5">
+        <Image src="/logo.png" alt="" width={28} height={28} priority />
+        <span className="text-[15px] font-semibold tracking-tight">
+          SRP Scripts
+        </span>
       </span>
     }
     logoLink="/"
     chatLink="https://discord.gg/5H6kG8XAur"
-    projectLink="https://github.com/SpringbankRoleplay/srp-scripts-docs"
+    projectLink={REPO}
   >
     <Link
       href="https://srp-scripts.com"
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Webshop"
-      className="hidden md:flex items-center"
+      aria-label="Store"
+      className="hidden items-center px-2 md:flex"
     >
-      <FontAwesomeIcon icon={faStore} className="w-5 h-5" />
+      <FontAwesomeIcon icon={faStore} className="h-4 w-4" />
     </Link>
   </Navbar>
 )
 
-const footer = <Footer>{new Date().getFullYear()} © SRP Gaming.</Footer>
+const footer = (
+  <Footer className="flex-col items-start text-sm">
+    <p className="text-srp-dim">
+      Not affiliated with Cfx.re, Take-Two Interactive or Rockstar Games.
+    </p>
+    <p className="mt-1">© {new Date().getFullYear()} SRP Gaming</p>
+  </Footer>
+)
 
-
-
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html
-      // Not required, but good for SEO
       lang="en"
-      // Required to be set
       dir="ltr"
-      // Suggested by `next-themes` package https://github.com/pacocoursey/next-themes#with-app
+      className={`${inter.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
-      <Head
-      // ... Your additional head options
-      >
-        {/* Your additional tags should be passed as `children` of `<Head>` element */}
-      </Head>
+      <Head color={{ hue: 217, saturation: 91, lightness: 60 }} />
       <body>
         <Layout
           banner={banner}
           navbar={navbar}
-          pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/SpringbankRoleplay/srp-scripts-docs/tree/main"
           footer={footer}
-        // ... Your additional layout options
+          pageMap={await getPageMap()}
+          docsRepositoryBase={`${REPO}/tree/main`}
+          sidebar={{ defaultMenuCollapseLevel: 1, toggleButton: true }}
+          toc={{ backToTop: null, float: true }}
+          editLink="Edit this page on GitHub"
+          feedback={{ content: 'Report an issue' }}
         >
           {children}
         </Layout>

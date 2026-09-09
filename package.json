@@ -25,6 +25,7 @@
     "@fortawesome/free-solid-svg-icons": "^7.3.1",
     "@fortawesome/react-fontawesome": "^3.5.0",
     "@tailwindcss/postcss": "^4.3.3",
+    "lucide-react": "^1.43.0",
     "next": "^16.3.4",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",
