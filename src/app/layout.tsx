@@ -64,7 +64,7 @@ const navbar = (
     }
     logoLink="/"
     chatLink="https://discord.gg/5H6kG8XAur"
-    projectLink="https://github.com/SpringbankRoleplay/srp-tebex-docs"
+    projectLink="https://github.com/SpringbankRoleplay/srp-scripts-docs"
   >
     <Link
       href="https://srp-scripts.com"
@@ -102,7 +102,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           banner={banner}
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/SpringbankRoleplay/srp-tebex-docs/tree/main"
+          docsRepositoryBase="https://github.com/SpringbankRoleplay/srp-scripts-docs/tree/main"
           footer={footer}
         // ... Your additional layout options
         >
