@@ -1,0 +1,111 @@
+---
+title: Welcome
+description: Documentation for the FiveM resources by SRP Gaming.
+---
+
+# SRP Scripts (nl)
+
+Resources for FiveM servers. Every script page here covers installation, the
+config options you can change, and the exports and events you can call.
+
+<Callout type="info">
+  New here? Start with [srp-core](/srp-core) — every other resource depends on it.
+</Callout>
+
+## Requirements
+
+Two resources, and that's it.
+
+<CardGrid>
+  <Card
+    title="srp-core"
+    href="/srp-core"
+    badge={<><Badge variant="free">free</Badge><Badge variant="required">required</Badge></>}
+    description="Our bridge. Detects your framework and inventory, then exposes one consistent API to every other script."
+  />
+  <Card
+    title="ox_lib"
+    href="https://overextended.dev/"
+    badge={<Badge variant="required">required</Badge>}
+    description="Library by CommunityOx, used for menus, notifications and callbacks."
+  />
+</CardGrid>
+
+Because srp-core does the bridging, there's nothing to install per framework or
+per inventory. Whatever you already run, it detects on startup and adapts.
+
+<Compatibility
+  frameworks={[
+    { name: 'ESX' },
+    { name: 'Standalone' },
+    { name: 'QBCore', support: 'no' },
+    { name: 'QBox', support: 'no' },
+  ]}
+  inventories={[
+    { name: 'ox_inventory' },
+  ]}
+  targets={[
+    { name: 'ox_target' },
+  ]}
+/>
+
+## Getting started
+
+<Steps>
+  <Step title="Get the resource">
+    Paid resources are delivered through [our store](https://srp-scripts.com).
+    After checkout the file sits in your Tebex account under Downloads.
+  </Step>
+
+  <Step title="Drop the files on your server">
+    Extract the archive into `resources/[srp]/`. Keep the folder name as it
+    ships — it's used in exports and event names.
+  </Step>
+
+  <Step title="Add it to server.cfg">
+    Order matters. `ox_lib` and `srp-core` have to start before anything that
+    depends on them.
+
+    ```cfg
+    ensure ox_lib
+    ensure srp-core
+    ensure srp-yourscript
+    ```
+  </Step>
+
+  <Step title="Import the database">
+    Run the included `.sql` file against your database. Skip this if the
+    resource ships without a `sql` folder.
+  </Step>
+
+  <Step title="Restart and check the console">
+    Start the server and watch the output. No errors during the resource's
+    startup means you're done.
+  </Step>
+</Steps>
+
+## Our resources
+
+<CardGrid>
+  <Card
+    title="srp-core"
+    href="/srp-core"
+    badge={<><Badge variant="free">free</Badge><Badge variant="required">required</Badge></>}
+    description="Player data, framework detection and shared exports. Required by everything else."
+  />
+  {/* Add one Card per released resource */}
+</CardGrid>
+
+## Support
+
+Something not working the way it's documented? Ask in
+[our Discord](https://discord.gg/5H6kG8XAur) and include:
+
+- the resource name and version
+- your framework and inventory
+- the error from your server or client console
+
+<Callout type="warning" title="Modified resources">
+  Support covers unmodified resources. If you've changed the code, say so up
+  front — we'll still take a look, we just can't guarantee anything.
+</Callout>
