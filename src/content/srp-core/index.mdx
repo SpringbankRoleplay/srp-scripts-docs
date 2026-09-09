@@ -1,132 +1,141 @@
-# SRP-Core
+---
+title: srp-core
+description: The bridge every SRP resource depends on.
+---
 
+# srp-core
 
-import { Callout } from "@/components/Callout"
-import { Card, CardGrid } from "@/components/Card"
-import { Steps, Step } from "@/components/Steps"
-import { Badge } from "@/components/Badge"
-import { Section } from "@/components/Section"
-
-/* -------------------------------------------------------------------------- */
-/*                                   Header                                   */
-/* -------------------------------------------------------------------------- */
-
-# Components
-
-A full overview of all reusable UI components available in the SRP Gaming Docs.
-
-<Callout title="Tip">
-Use this page as a reference when writing documentation pages.
-</Callout>
-
-/* -------------------------------------------------------------------------- */
-/*                                  Callouts                                  */
-/* -------------------------------------------------------------------------- */
-
-<Section
-  title="Callouts"
-  description="Use callouts to highlight important information."
+<ResourceHeader
+  version="1.2.0"
+  price="Free"
+  status="stable"
+  downloadUrl="https://github.com/SpringbankRoleplay/srp-core/releases/latest"
+  githubUrl="https://github.com/SpringbankRoleplay/srp-core"
 >
-  <Callout type="info" title="Info">
-    This is an informational callout.
-  </Callout>
+  Detects your framework and inventory on startup, then exposes one consistent
+  API to every other SRP resource. Install it once and forget about it.
+</ResourceHeader>
 
-  <Callout type="success" title="Success">
-    The operation completed successfully.
-  </Callout>
+<Compatibility
+  frameworks={[{ name: 'ESX' }, { name: 'Standalone' }]}
+  inventories={[{ name: 'ox_inventory' }]}
+/>
 
-  <Callout type="warning" title="Warning">
-    This feature requires special permissions.
-  </Callout>
+## Installation
 
-  <Callout type="error" title="Error">
-    Something went wrong.
-  </Callout>
-</Section>
+<Steps>
+  <Step title="Download the resource">
+    Grab the latest release from GitHub and extract it into `resources/[srp]/`.
+  </Step>
 
-/* -------------------------------------------------------------------------- */
-/*                                   Badges                                   */
-/* -------------------------------------------------------------------------- */
+  <Step title="Add it to server.cfg">
+    srp-core has to start before any resource that depends on it.
 
-<Section
-  title="Badges"
-  description="Badges are useful for marking feature status."
+    ```cfg
+    ensure ox_lib
+    ensure srp-core
+    ```
+  </Step>
+
+  <Step title="Restart">
+    Check the console on startup — srp-core prints which framework and
+    inventory it detected.
+  </Step>
+</Steps>
+
+## Configuration
+
+Options live in `config.lua`.
+
+<Properties>
+  <Property name="Config.Framework" type="string" defaultValue="'auto'">
+    Force a specific framework instead of auto-detecting. Accepts `esx`,
+    `standalone` or `auto`.
+  </Property>
+
+  <Property name="Config.Inventory" type="string" defaultValue="'auto'">
+    Same idea for the inventory. Accepts `ox_inventory` or `auto`.
+  </Property>
+
+  <Property name="Config.Debug" type="boolean" defaultValue="false">
+    Prints detection results and every bridge call to the console. Leave this
+    off in production — it's noisy.
+  </Property>
+</Properties>
+
+## Exports
+
+<Reference
+  name="getPlayer"
+  side="server"
+  kind="export"
+  signature="exports['srp-core']:getPlayer(source)"
+  returns="table | nil"
 >
-  <div className="flex flex-wrap gap-2">
-    <Badge>Default</Badge>
-    <Badge variant="new">NEW</Badge>
-    <Badge variant="beta">BETA</Badge>
-    <Badge variant="deprecated">DEPRECATED</Badge>
-  </div>
-</Section>
+  <Properties>
+    <Property name="source" type="number" required>
+      Server ID of the player.
+    </Property>
+  </Properties>
+</Reference>
 
-/* -------------------------------------------------------------------------- */
-/*                                    Cards                                   */
-/* -------------------------------------------------------------------------- */
-
-<Section
-  title="Cards"
-  description="Cards are ideal for navigation and overview pages."
+<Reference
+  name="getIdentifier"
+  side="server"
+  kind="export"
+  signature="exports['srp-core']:getIdentifier(source)"
+  returns="string | nil"
 >
-  <CardGrid>
-    <Card
-      title="Getting Started"
-      description="Learn how to install and configure SRP."
-      href="/docs/getting-started"
-    />
-    <Card
-      title="API Reference"
-      description="All server & client exports."
-      href="/docs/api"
-    />
-    <Card
-      title="Permissions"
-      description="Understand roles and access levels."
-    />
-  </CardGrid>
-</Section>
+  <Properties>
+    <Property name="source" type="number" required>
+      Server ID of the player.
+    </Property>
+  </Properties>
+</Reference>
 
-/* -------------------------------------------------------------------------- */
-/*                                    Steps                                   */
-/* -------------------------------------------------------------------------- */
-
-<Section
-  title="Steps"
-  description="Steps are perfect for tutorials and guides."
+<Reference
+  name="addItem"
+  side="server"
+  kind="export"
+  signature="exports['srp-core']:addItem(source, item, count)"
+  returns="boolean"
 >
-  <Steps>
-    <Step title="Install the resource">
-      Place the resource inside the <code>/resources</code> folder.
-    </Step>
+  <Properties>
+    <Property name="source" type="number" required>
+      Server ID of the player.
+    </Property>
+    <Property name="item" type="string" required>
+      Item name as registered in your inventory.
+    </Property>
+    <Property name="count" type="number" defaultValue="1">
+      How many to give.
+    </Property>
+  </Properties>
+</Reference>
 
-    <Step title="Configure server.cfg">
-      Add <code>ensure srp-core</code> to your config.
-    </Step>
+## Events
 
-    <Step title="Restart server">
-      Restart your FiveM server to apply changes.
-    </Step>
-  </Steps>
-</Section>
+<Reference name="srp-core:playerLoaded" side="server" kind="event">
+  Fires once a player is fully loaded and their data is available. Wait for
+  this before reading anything about the player.
 
-/* -------------------------------------------------------------------------- */
-/*                               Combined Example                              */
-/* -------------------------------------------------------------------------- */
+  <Properties>
+    <Property name="source" type="number">
+      Server ID of the player that loaded.
+    </Property>
+  </Properties>
+</Reference>
 
-<Section
-  title="Combined Example"
-  description="Components can be freely combined."
->
-  <Callout type="warning" title="Beta Feature">
-    This feature is currently in <Badge variant="beta">BETA</Badge>
-  </Callout>
+## Changelog
 
-  <Steps>
-    <Step title="Enable feature">
-      Set <code>experimental = true</code> in the config.
-    </Step>
-    <Step title="Restart server">
-      Changes take effect after restart.
-    </Step>
-  </Steps>
-</Section>
+<Changelog>
+  <Release version="1.2.0" date="12 May 2026">
+    <Change kind="added">Standalone mode for servers without a framework.</Change>
+    <Change kind="fixed">Inventory detection when ox_inventory starts late.</Change>
+  </Release>
+
+  <Release version="1.1.0" date="3 March 2026">
+    <Change kind="added">`Config.Debug` for troubleshooting detection.</Change>
+    <Change kind="changed">`getPlayer` now returns `nil` instead of an empty table.</Change>
+  </Release>
+</Changelog>
