@@ -28,6 +28,10 @@ const locales = [
   { locale: 'nl', name: 'Nederlands' },
 ]
 
+export function generateStaticParams() {
+  return locales.map(({ locale }) => ({ lang: locale }))
+}
+
 export const metadata = {
   title: {
     default: 'SRP Scripts',
