@@ -23,6 +23,10 @@ const mono = JetBrains_Mono({
 const SITE_URL = 'https://docs.srp-scripts.com'
 const REPO = 'https://github.com/SpringbankRoleplay/srp-scripts-docs'
 
+const locales = [
+  { locale: 'en', name: 'English' },
+  { locale: 'nl', name: 'Nederlands' },
+]
 
 export const metadata = {
   title: {
