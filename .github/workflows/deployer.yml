@@ -33,7 +33,8 @@ jobs:
           test -f out/index.html || { echo "missing out/index.html — is public/index.html present?"; exit 1; }
           test -f out/en/index.html || { echo "missing out/en/"; exit 1; }
           test -f out/nl/index.html || { echo "missing out/nl/ — check generateStaticParams"; exit 1; }
-
+          test -d out/_pagefind || { echo "missing out/_pagefind — pagefind postbuild failed"; exit 1; }
+      
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
