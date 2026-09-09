@@ -18,9 +18,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -33,26 +30,23 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Create .nojekyll file
-        run: touch out/.nojekyll
+      - name: Make English homepage the root homepage
+        run: cp out/en/index.html out/index.html
 
-      - name: Duplicate EN to root index.html #// beetje iligaal maar goed genoeg voor nu. (niet aankomen!!!)
+      - name: Check homepage asset paths
         run: |
-          if [ -f out/en.html ]; then
-            cp out/en.html out/index.html
-            echo "✅ Copied en.html → index.html"
-          elif [ -f out/en/index.html ]; then
-            cp out/en/index.html out/index.html
-            echo "✅ Copied en/index.html → index.html"
-          else
-            echo "❌ No EN entry file found"
-            exit 1
-          fi
+          echo "Root homepage:"
+          grep -oE 'src="[^"]+|href="[^"]+' out/index.html | head -50
+
+          echo ""
+          echo "English homepage:"
+          grep -oE 'src="[^"]+|href="[^"]+' out/en/index.html | head -50
 
       - name: List output directory contents
         run: |
           echo "Contents of out directory:"
           ls -la out/
+
           echo "Checking for index.html:"
           if [ -f "out/index.html" ]; then
             echo "✅ index.html found!"
@@ -61,11 +55,10 @@ jobs:
             echo "❌ index.html NOT found!"
             exit 1
           fi
-
-      - name: Upload
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
+            - name: Upload
+              uses: actions/upload-pages-artifact@v3
+              with:
+                path: ./out
 
   deploy:
     runs-on: ubuntu-latest
