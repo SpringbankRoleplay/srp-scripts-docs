@@ -1,9 +1,8 @@
-name: Deployer
+name: Deploy
 
 on:
   push:
     branches: ["main"]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -11,7 +10,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
@@ -19,30 +18,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: 20
+          cache: npm
 
-      - name: Install dependencies with NPM
-        run: npm install
+      - name: Install
+        run: npm ci
 
-      - name: Build with Next.js
+      - name: Build
         run: npm run build
 
-      - name: Copy CNAME to output directory
-        run: cp CNAME out/CNAME
+      - name: Make English homepage the root homepage
+        run: cp out/en/index.html out/index.html
 
-      - name: postbuild
-        run: npm run postbuild
-
-      - name: Upload artifact
+      - name: Upload
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
@@ -56,6 +50,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
