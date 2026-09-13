@@ -71,10 +71,7 @@ export default async function RootLayout({
   params,
 }: {
   children: React.ReactNode
-  params: Promise<{ lang: string }>
 }) {
-  const { lang } = await params
-
   const navbar = (
     <Navbar
       logo={
@@ -85,7 +82,7 @@ export default async function RootLayout({
           </span>
         </span>
       }
-      logoLink={`/${lang}`}
+      logoLink={`/`}
       chatLink="https://discord.gg/5H6kG8XAur"
       projectLink={REPO}
     >
@@ -103,7 +100,7 @@ export default async function RootLayout({
 
   return (
     <html
-      lang={lang}
+      lang="en"
       dir="ltr"
       className={`${inter.variable} ${mono.variable}`}
       suppressHydrationWarning
