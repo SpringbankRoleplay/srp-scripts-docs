@@ -40,7 +40,7 @@ export default function NotFound() {
           icon={Package}
           title="Resources"
           description="Browse every script"
-          href="/en"
+          href="/"
         />
         <Tile
           icon={MessagesSquare}
