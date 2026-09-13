@@ -30,9 +30,15 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      - name: Mirror out/en → out/
+        run: |
+          test -d out/en || { echo "out/en does not exist — did the export produce locale dirs?"; exit 1; }
+          cp -a out/en/. out/
+          echo "mirrored out/en → out/"
+
       - name: Verify export
         run: |
-          test -f out/index.html    || { echo "root mirror missing — postbuild failed"; exit 1; }
+          test -f out/index.html    || { echo "root mirror missing"; exit 1; }
           test -f out/en/index.html || { echo "missing out/en/"; exit 1; }
           test -f out/nl/index.html || { echo "missing out/nl/"; exit 1; }
           test -d out/_pagefind     || { echo "pagefind failed"; exit 1; }
