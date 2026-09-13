@@ -14,17 +14,17 @@ type Variant =
   | 'shared'
 
 const styles: Record<Variant, string> = {
-  default: 'bg-srp-raised text-srp-dim ring-srp-border',
-  free: 'bg-green-500/12 text-green-300 ring-green-500/25',
-  paid: 'bg-srp-accent/12 text-srp-accent-hover ring-srp-accent/25',
-  required: 'bg-srp-accent/12 text-srp-accent-hover ring-srp-accent/25',
-  optional: 'bg-srp-raised text-srp-dim ring-srp-border',
-  new: 'bg-green-500/12 text-green-300 ring-green-500/25',
-  beta: 'bg-yellow-500/12 text-yellow-300 ring-yellow-500/25',
-  deprecated: 'bg-red-500/12 text-red-300 ring-red-500/25',
-  server: 'bg-purple-500/12 text-purple-300 ring-purple-500/25',
-  client: 'bg-sky-500/12 text-sky-300 ring-sky-500/25',
-  shared: 'bg-srp-raised text-srp-dim ring-srp-border',
+  default: 'bg-slate-500/10 text-slate-300 ring-slate-400/20',
+  free: 'bg-emerald-500/10 text-emerald-300 ring-emerald-400/25',
+  paid: 'bg-amber-500/10 text-amber-300 ring-amber-400/25',
+  required: 'bg-rose-500/10 text-rose-300 ring-rose-400/25',
+  optional: 'bg-slate-500/10 text-slate-300 ring-slate-400/20',
+  new: 'bg-cyan-500/10 text-cyan-300 ring-cyan-400/25',
+  beta: 'bg-violet-500/10 text-violet-300 ring-violet-400/25',
+  deprecated: 'bg-orange-500/10 text-orange-300 ring-orange-400/25',
+  server: 'bg-indigo-500/10 text-indigo-300 ring-indigo-400/25',
+  client: 'bg-sky-500/10 text-sky-300 ring-sky-400/25',
+  shared: 'bg-teal-500/10 text-teal-300 ring-teal-400/25',
 }
 
 export function Badge({

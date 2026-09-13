@@ -1,0 +1,209 @@
+---
+title: Integrated
+description: Shared runtime helpers available to every SRP resource — export registration, event dispatch, and cross-context utilities.
+---
+
+---
+<Callout type="info">
+  Integrated is loaded automatically as a shared script.
+</Callout>
+
+
+## Logging <Badge variant="shared">shared</Badge>
+ 
+Integrated replaces the global `print` with a logger that prefixes every line
+with the resource name, an optional scope, and a coloured level tag. Colours are
+resolved per context automatically — ANSI escapes on the server, `^n` codes on
+the client.
+ 
+```lua
+print.info('player %s connected', source)
+--> [srp-core] [INFO] player 3 connected
+```
+ 
+Plain `print('x')` still works and goes straight through to the original
+implementation untouched, so existing code needs no changes.
+ 
+### Levels
+ 
+<Properties>
+  <Property name="print.info" type="function">
+    General operational messages. Cyan.
+  </Property>
+  <Property name="print.warn" type="function">
+    Recoverable problems. Yellow.
+  </Property>
+  <Property name="print.error" type="function">
+    Failures. Red. Does not throw or halt execution.
+  </Property>
+  <Property name="print.success" type="function">
+    Confirmation of a completed action. Green.
+  </Property>
+  <Property name="print.debug" type="function">
+    Suppressed unless debugging is enabled for the resource or scope. Magenta.
+  </Property>
+</Properties>
+Every level takes a message followed by optional `string.format` arguments:
+ 
+```lua
+print.warn('vehicle %s despawned after %d seconds', plate, elapsed)
+```
+ 
+Formatting is applied through `pcall`. If the format spec does not match the
+arguments, the raw message is printed instead of raising — a bad log line will
+never take down the calling code.
+ 
+<Callout type="info">
+  Both dot and colon calls are accepted. `print:info('x')` behaves identically
+  to `print.info('x')`.
+</Callout>
+### Generic form
+ 
+`print.log` dispatches by level name, which is useful when the level is itself
+a variable:
+ 
+```lua
+print.log(ok and 'success' or 'error', 'migration finished')
+```
+ 
+<Callout type="warning">
+  An unrecognised level name is still printed, uncoloured, with the name
+  upper-cased as the tag — it is not silently dropped. Note that this fallback
+  path bypasses debug gating entirely, so `print.log('debug', ...)` with a typo
+  in the level will print unconditionally.
+</Callout>
+### Scopes
+ 
+`print.scope` returns a logger that adds a second bracket to the prefix, for
+distinguishing modules inside one resource:
+ 
+```lua
+local log = print.scope('vehicles')
+ 
+log.info('spawned %s', model)
+--> [srp-garage] [vehicles] [INFO] spawned adder
+```
+ 
+Scoped loggers are cached by name, so repeated calls to `print.scope('vehicles')`
+return the same table rather than building a new one.
+ 
+<Callout type="warning">
+  The scope registry is flat, not hierarchical. Calling `.scope()` on a scoped
+  logger returns a sibling, not a child — `print.scope('a').scope('b')` is the
+  same logger as `print.scope('b')`, and its prefix reads `[b]`, not `[a.b]`.
+</Callout>
+Calling `print.scope()` with no name returns the root logger.
+ 
+### Debug gating
+ 
+`print.debug` is the only level that can be suppressed. Three convars control
+it, and **the most specific one that is actually set wins** — a per-scope value
+overrides a per-resource value, which overrides the global default:
+ 
+```bash
+# Global default for every resource
+setr srp-core:debug false
+ 
+# Override for one resource
+setr srp-core:debug.srp-garage true
+ 
+# Override for one scope inside that resource
+setr srp-core:debug.srp-garage.vehicles true
+```
+ 
+<Properties>
+  <Property name="srp-core:debug" type="boolean">
+    Global fallback. Used only when neither of the more specific convars is set.
+  </Property>
+  <Property name="srp-core:debug.<resource>" type="string">
+    Per-resource override. Accepts `true`, `1`, or `yes` as truthy; any other
+    non-empty value is false.
+  </Property>
+  <Property name="srp-core:debug.<resource>.<scope>" type="string">
+    Per-scope override. Highest precedence.
+  </Property>
+</Properties>
+<Callout type="info">
+  Precedence is decided by whether a convar is **set**, not by its value. Setting
+  `srp-core:debug.srp-garage false` will suppress debug output for that resource
+  even when the global `srp-core:debug` is true.
+</Callout>
+Lookups are cached for one second per key, so toggling a convar at runtime takes
+effect on the next second rather than immediately. This keeps `print.debug` cheap
+enough to leave in hot paths.
+ 
+
+## RegisterExport <Badge variant="shared">shared</Badge>
+
+Registers a function as an export of the current resource.
+
+<Properties>
+  <Property name="name" type="string" required>
+    The name the export is published under. Must be unique within the resource.
+  </Property>
+  <Property name="callback" type="function" required>
+    The function to expose. Receives whatever arguments the caller passes.
+  </Property>
+    <Property name="resource" type="string|table" optional>
+    The function to expose. Receives whatever arguments the caller passes.
+  </Property>
+</Properties>
+
+```lua
+RegisterExport('getPlayerLicense', function(playerId)
+    return "license"
+end)
+```
+
+```lua
+RegisterExport('getPlayerLicense', function(playerId)
+    return "license"
+end, "srp-core")
+```
+
+Consumers call it the usual way:
+
+```lua
+local license = exports['srp-core']:getPlayerLicense(source)
+```
+
+## TriggerClientEvent <Badge variant="server">server</Badge>
+
+On the server, Integrated replaces the native `TriggerClientEvent` with a
+version that accepts either a single player ID or a table of them. The native
+behaviour is preserved for every other call shape, so existing code continues to
+work unchanged.
+
+<Properties>
+  <Property name="eventName" type="string" required>
+    The event to trigger on the client.
+  </Property>
+  <Property name="playerIds" type="string | table" required>
+    A single player ID, or a table of player IDs. When a table is passed, the
+    event is dispatched to each entry in turn.
+  </Property>
+  <Property name="..." type="any">
+    Any additional arguments, forwarded to the event handler.
+  </Property>
+</Properties>
+
+```lua
+-- Single player — identical to the native
+TriggerClientEvent('srp:notify', source, 'Welcome back.')
+
+-- Many players — dispatched one at a time
+TriggerClientEvent('srp:notify', { 1, 4, 7 }, 'Shop is closing.')
+```
+
+<Callout type="warning">
+  The table branch yields with `Wait(0)` between each dispatch to avoid
+  saturating the network thread on large player lists. This means the call is
+  **asynchronous** when given a table — it must be made from inside a thread,
+  and execution continues before every player has received the event. The
+  single-ID branch stays synchronous.
+</Callout>
+
+<Callout type="info">
+  To reach every connected player, pass `-1` rather than building a table of IDs.
+  That path goes straight to the native and skips the per-player loop entirely.
+</Callout>

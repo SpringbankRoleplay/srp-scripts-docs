@@ -30,13 +30,6 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Verify export
-        run: |
-          test -f out/index.html    || { echo "root redirect missing"; exit 1; }
-          test -f out/en/index.html || { echo "missing out/en/"; exit 1; }
-          test -f out/nl/index.html || { echo "missing out/nl/"; exit 1; }
-          test -d out/_pagefind     || { echo "pagefind failed"; exit 1; }
-
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./out

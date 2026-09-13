@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingCart } from 'lucide-react'
 
-import '../globals.css'
+import './globals.css'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -22,15 +22,6 @@ const mono = JetBrains_Mono({
 
 const SITE_URL = 'https://docs.srp-scripts.com'
 const REPO = 'https://github.com/SpringbankRoleplay/srp-scripts-docs'
-
-const locales = [
-  { locale: 'en', name: 'English' },
-  { locale: 'nl', name: 'Nederlands' },
-]
-
-export function generateStaticParams() {
-  return locales.map(({ locale }) => ({ lang: locale }))
-}
 
 export const metadata = {
   title: {
@@ -77,13 +68,9 @@ const footer = (
 
 export default async function RootLayout({
   children,
-  params,
 }: {
   children: React.ReactNode
-  params: Promise<{ lang: string }>
 }) {
-  const { lang = 'en' } = await params
-
   const navbar = (
     <Navbar
       logo={
@@ -94,7 +81,7 @@ export default async function RootLayout({
           </span>
         </span>
       }
-      logoLink={`/${lang}`}
+      logoLink={`/`}
       chatLink="https://discord.gg/5H6kG8XAur"
       projectLink={REPO}
     >
@@ -112,7 +99,7 @@ export default async function RootLayout({
 
   return (
     <html
-      lang={lang}
+      lang="en"
       dir="ltr"
       className={`${inter.variable} ${mono.variable}`}
       suppressHydrationWarning
@@ -123,13 +110,12 @@ export default async function RootLayout({
           banner={banner}
           navbar={navbar}
           footer={footer}
-          pageMap={await getPageMap(`/${lang}`)}
+          pageMap={await getPageMap()}
           docsRepositoryBase={`${REPO}/tree/main`}
           sidebar={{ defaultMenuCollapseLevel: 1, toggleButton: true }}
           toc={{ backToTop: null, float: true }}
           editLink="Edit this page on GitHub"
           feedback={{ content: 'Report an issue' }}
-          i18n={locales}
         >
           {children}
         </Layout>

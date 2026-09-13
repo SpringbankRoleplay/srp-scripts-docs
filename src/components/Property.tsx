@@ -9,12 +9,14 @@ export function Property({
   type,
   defaultValue,
   required,
+  optional,
   children,
 }: {
   name: string
   type: string
   defaultValue?: string
   required?: boolean
+  optional?: boolean
   children?: React.ReactNode
 }) {
   return (
@@ -25,6 +27,7 @@ export function Property({
         </code>
         <span className="font-mono text-xs text-srp-accent-hover">{type}</span>
         {required && <Badge variant="required">required</Badge>}
+        {optional && <Badge variant="optional">optional</Badge>}
         {defaultValue !== undefined && (
           <span className="font-mono text-xs text-srp-dim">
             default: {defaultValue}
