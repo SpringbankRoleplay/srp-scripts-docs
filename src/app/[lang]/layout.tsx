@@ -82,7 +82,7 @@ export default async function RootLayout({
   children: React.ReactNode
   params: Promise<{ lang: string }>
 }) {
-  const { lang } = await params
+  const { lang = 'en' } = await params
 
   const navbar = (
     <Navbar
