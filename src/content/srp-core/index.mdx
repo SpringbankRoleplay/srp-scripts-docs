@@ -45,97 +45,55 @@ description: The bridge every SRP resource depends on.
 
 ## Configuration
 
-Options live in `config.lua`.
+Bridges are configured entirely through convars in `server.cfg`. You should not
+need to edit any file inside the resource.
+
+### Convars
 
 <Properties>
-  <Property name="Config.Framework" type="string" defaultValue="'auto'">
-    Force a specific framework instead of auto-detecting. Accepts `esx`,
-    `standalone` or `auto`.
+  <Property name="srp-core:bridge.target" type="string" defaultValue="'ox'">
+    Targeting bridge. Accepts `ox`.
   </Property>
 
-  <Property name="Config.Inventory" type="string" defaultValue="'auto'">
-    Same idea for the inventory. Accepts `ox_inventory` or `auto`.
-  </Property>
-
-  <Property name="Config.Debug" type="boolean" defaultValue="false">
-    Prints detection results and every bridge call to the console. Leave this
-    off in production — it's noisy.
+  <Property name="srp-core:bridge.notify" type="string" defaultValue="'ox'">
+    Notification bridge. Accepts `ox` or `esx`.
   </Property>
 </Properties>
 
-## Exports
+```bash
+setr srp-core:bridge.target "ox"
+setr srp-core:bridge.notify "esx"
+```
 
-<Reference
-  name="getPlayer"
-  side="server"
-  kind="export"
-  signature="exports['srp-core']:getPlayer(source)"
-  returns="table | nil"
->
-  <Properties>
-    <Property name="source" type="number" required>
-      Server ID of the player.
-    </Property>
-  </Properties>
-</Reference>
+<Callout type="warning">
+  Use `setr`, not `set`. Bridges are resolved on both the client and the server,
+  and a non-replicated convar is invisible to the client — the bridge will
+  silently fall back to its default there while working correctly on the server.
+</Callout>
 
-<Reference
-  name="getIdentifier"
-  side="server"
-  kind="export"
-  signature="exports['srp-core']:getIdentifier(source)"
-  returns="string | nil"
->
-  <Properties>
-    <Property name="source" type="number" required>
-      Server ID of the player.
-    </Property>
-  </Properties>
-</Reference>
+<Callout type="info">
+  An unrecognised value logs a warning and falls back to the default rather than
+  erroring, so a typo in `server.cfg` will not stop the resource from starting.
+  Check the console on boot if a bridge is not behaving as configured.
+</Callout>
 
-<Reference
-  name="addItem"
-  side="server"
-  kind="export"
-  signature="exports['srp-core']:addItem(source, item, count)"
-  returns="boolean"
->
-  <Properties>
-    <Property name="source" type="number" required>
-      Server ID of the player.
-    </Property>
-    <Property name="item" type="string" required>
-      Item name as registered in your inventory.
-    </Property>
-    <Property name="count" type="number" defaultValue="1">
-      How many to give.
-    </Property>
-  </Properties>
-</Reference>
+Omit a convar entirely to use its default. There is no reason to set one to the
+value it already has.
 
-## Events
+### Debugging
 
-<Reference name="srp-core:playerLoaded" side="server" kind="event">
-  Fires once a player is fully loaded and their data is available. Wait for
-  this before reading anything about the player.
+To see which bridge was resolved for each kind at boot:
 
-  <Properties>
-    <Property name="source" type="number">
-      Server ID of the player that loaded.
-    </Property>
-  </Properties>
-</Reference>
+```bash
+setr srp-core:debug.srp-core true
+```
 
-## Changelog
+See [Debug gating](/srp-core/import/integrated/#debug-gating) for narrowing this to a
+single scope.
 
-<Changelog>
-  <Release version="1.2.0" date="12 May 2026">
-    <Change kind="added">Standalone mode for servers without a framework.</Change>
-    <Change kind="fixed">Inventory detection when ox_inventory starts late.</Change>
-  </Release>
-
-  <Release version="1.1.0" date="3 March 2026">
-    <Change kind="added">`Config.Debug` for troubleshooting detection.</Change>
-    <Change kind="changed">`getPlayer` now returns `nil` instead of an empty table.</Change>
-  </Release>
-</Changelog>
+<Callout type="warning">
+  `config.lua` exists for development of the resource itself — it declares which
+  bridge implementations are available to be selected. Editing it is not a
+  supported way to configure your server, and your changes will be overwritten
+  on update. Use the convars above.
+</Callout>
