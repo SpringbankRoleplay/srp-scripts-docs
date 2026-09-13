@@ -13,10 +13,6 @@ export default withNextra({
       'next-mdx-import-source-file': './src/mdx-components.tsx',
     },
   },
-  i18n: {
-    locales: ['en', 'nl'],
-    defaultLocale: 'en'
-  },
   webpack(config) {
     config.resolve.alias['next-mdx-import-source-file'] =
       './src/mdx-components.tsx'
