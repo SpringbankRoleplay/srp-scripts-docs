@@ -1,1 +1,90 @@
-test
+---
+title: Shared
+description: sCore modules available on both the client and the server — loading the import and translations.
+---
+
+# Shared
+
+## Loading the import
+
+Every SRP resource talks to srp-core through the `sCore` object. Add the import
+for your resource's language to its `fxmanifest.lua`:
+
+```lua
+-- Lua resource
+dependency 'srp-core'
+shared_script '@srp-core/imports.lua'
+```
+
+```lua
+-- JavaScript resource
+dependency 'srp-core'
+shared_script '@srp-core/imports.js'
+```
+
+Both give you the same `sCore` API. In Lua a module loads the first time you
+touch it (`sCore.locale`, `sCore.notify`, ...) and runs **inside your
+resource**, so anything it creates is cleaned up when your resource stops.
+
+<Callout type="info">
+  Prefer `sCore` over calling `exports['srp-core']` directly. The import handles
+  errors and caching for you, and keeps your code the same if srp-core's
+  internals change.
+</Callout>
+
+## sCore.locale <Badge variant="shared">shared</Badge>
+
+Translations. srp-core decides the language, while the text stays in **your**
+resource:
+
+```text
+your-resource/
+└── locales/
+    ├── en.json
+    └── nl.json
+```
+
+```json
+{
+  "report_closed": "Report #%s has been closed."
+}
+```
+
+List the files in your manifest so clients can read them too:
+
+```lua
+files { 'locales/*.json' }
+```
+
+Then look strings up by key. `%s` placeholders are filled in order:
+
+```lua
+sCore.locale('report_closed', 12)  --> "Report #12 has been closed."
+```
+
+```js
+sCore.locale('report_closed', 12); // same in JavaScript
+```
+
+<Properties>
+  <Property name="sCore.locale(key, ...)" type="function">
+    Returns the translated string. A missing key returns the key itself, so a
+    typo shows up on screen instead of failing silently.
+  </Property>
+  <Property name="sCore.locale.all()" type="function">
+    The whole dictionary as a table/object. Handy for passing to your NUI.
+  </Property>
+  <Property name="sCore.locale.language()" type="function">
+    The active language code, e.g. `"nl"`.
+  </Property>
+</Properties>
+
+### Choosing the language
+
+```bash
+setr srp-core:locale "nl"
+```
+
+Keys missing from the chosen language fall back to English
+(`Config.fallbackLocale`). Use `setr` so clients get the same language as the
+server.

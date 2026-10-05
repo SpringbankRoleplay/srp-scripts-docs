@@ -1,1 +1,72 @@
-test
+---
+title: Client
+description: Client-side sCore modules — notifications and targeting.
+---
+
+# Client
+
+## sCore.notify <Badge variant="client">client</Badge>
+
+Shows a notification through the configured notify bridge
+(`srp-core.bridge.notify`).
+
+```lua
+sCore.notify({
+    title       = 'Garage',
+    description = 'Vehicle stored',
+    type        = 'success',
+})
+```
+
+<Properties>
+  <Property name="title" type="string">Heading of the notification.</Property>
+  <Property name="description" type="string">Body text.</Property>
+  <Property name="type" type="string" defaultValue="'info'">
+    `success`, `error`, `inform`, `warning`, ... Passed to the bridge as-is.
+  </Property>
+  <Property name="duration" type="number" defaultValue="5000">Milliseconds.</Property>
+  <Property name="position" type="string" defaultValue="'top-right'">
+    `top`, `top-right`, `top-left`, `bottom`, `bottom-right`, `bottom-left`,
+    `center-right`, `center-left`.
+  </Property>
+  <Property name="icon" type="string">Icon name (ox bridge only).</Property>
+</Properties>
+
+## sCore.target <Badge variant="client">client</Badge>
+
+Targeting through the configured target bridge (`srp-core.bridge.target`). The
+functions take the same arguments as their
+[ox_target](https://coxdocs.dev/ox_target) counterparts.
+
+```lua
+local zone = sCore.target.addBoxZone({
+    coords = vec3(441.0, -981.0, 30.7),
+    size = vec3(2, 2, 2),
+    options = {
+        { label = 'Open', onSelect = function() end },
+    },
+})
+
+sCore.target.removeZone(zone)
+```
+
+<Properties>
+  <Property name="Zones" type="function">
+    `addBoxZone`, `addSphereZone`, `addPolyZone` (return the zone id), `removeZone`
+  </Property>
+  <Property name="Entities" type="function">
+    `addEntity`, `removeEntity`, `addLocalEntity`, `removeLocalEntity`, `addModel`, `removeModel`
+  </Property>
+  <Property name="Globals" type="function">
+    `addGlobalOption`, `addGlobalObject`, `addGlobalPed`, `addGlobalPlayer`,
+    `addGlobalVehicle` and their `remove*` versions
+  </Property>
+  <Property name="disableTargeting" type="function">
+    `disableTargeting(state)`
+  </Property>
+</Properties>
+
+<Callout type="info">
+  Zones and options belong to your resource, so they are removed when your
+  resource stops, not when srp-core does.
+</Callout>

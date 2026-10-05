@@ -1,1 +1,84 @@
-test
+---
+title: Server
+description: Server-side sCore modules — notifications, player identifiers and staff ranks.
+---
+
+# Server
+
+## sCore.notify <Badge variant="server">server</Badge>
+
+Sends a notification to one player, several players or everyone. It uses the
+same fields as the [client version](/srp-core/import/client/#scorenotify).
+
+```lua
+sCore.notify(source, { title = 'Shop', description = 'Purchase complete', type = 'success' })
+sCore.notify({ 1, 4, 7 }, { description = 'Shop is closing.' })
+sCore.notify(-1, { description = 'Restart in 5 minutes.' })
+```
+
+```js
+sCore.notify(source, { title: 'Shop', description: 'Purchase complete', type: 'success' });
+```
+
+## sCore.identifier <Badge variant="server">server</Badge>
+
+One identifier type for every SRP resource, so player data lines up across
+scripts.
+
+```lua
+local id = sCore.identifier.get(source)               --> "license:abc123" or nil
+local discord = sCore.identifier.get(source, 'discord') --> "discord:1234" or nil
+```
+
+<Properties>
+  <Property name="sCore.identifier.get(source, type?)" type="function">
+    The player's identifier of `type`, or of the main type when omitted.
+    Returns `nil` when the player has none.
+  </Property>
+  <Property name="sCore.identifier.mainType()" type="function">
+    The configured main type, e.g. `"license"`.
+  </Property>
+</Properties>
+
+```bash
+set srp-core:mainIdentifier "license"
+```
+
+## sCore.ranks <Badge variant="server">server</Badge>
+
+Staff ranks without an admin framework. Ranks are listed lowest first in
+srp-core's config and granted through ACE.
+
+```lua
+Config.ranks = { 'jrmod', 'mod', 'srmod', 'admin', 'owner' }
+```
+
+Give a group a rank in `server.cfg`:
+
+```bash
+add_ace group.admin srp.rank.admin allow
+add_ace group.mod   srp.rank.mod   allow
+add_principal identifier.license:abc123 group.admin
+```
+
+```lua
+if sCore.ranks.has(source, 'jrmod') then
+    -- jrmod, mod, srmod, admin and owner all pass
+end
+
+local rank = sCore.ranks.get(source) --> "admin" or nil
+```
+
+<Properties>
+  <Property name="sCore.ranks.has(source, rank)" type="function">
+    `true` when the player has `rank` or any rank above it.
+  </Property>
+  <Property name="sCore.ranks.get(source)" type="function">
+    The player's highest rank, or `nil`.
+  </Property>
+</Properties>
+
+<Callout type="warning">
+  An unknown rank name logs a warning and returns `false`. Check the spelling
+  against `Config.ranks`.
+</Callout>

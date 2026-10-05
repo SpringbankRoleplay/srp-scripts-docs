@@ -1,0 +1,156 @@
+---
+title: srp-reports
+description: In-game report system with a player chat, a staff panel and Discord logs.
+---
+
+# srp-reports
+
+<ResourceHeader
+  version="1.1.0"
+  status="beta"
+>
+  Players open a report with `/report` and chat with staff in real time. Staff
+  handle every open report from one movable panel with `/reports`: claim, reply,
+  goto, bring and close. Closed reports are logged to Discord with a full HTML
+  transcript.
+</ResourceHeader>
+
+<Compatibility
+  frameworks={[{ name: 'ESX' }, { name: 'Standalone' }]}
+/>
+
+## Installation
+
+<Steps>
+  <Step title="Drop the files on your server">
+    Extract into `resources/[srp]/srp-reports`.
+  </Step>
+
+  <Step title="Add it to server.cfg">
+    ```cfg
+    ensure ox_lib
+    ensure srp-core
+    ensure srp-reports
+    ```
+  </Step>
+
+  <Step title="Give your staff a rank">
+    Access to `/reports` uses [srp-core ranks](/srp-core/import/server/#scoreranks).
+    The default minimum is `jrmod`.
+
+    ```cfg
+    add_ace group.mod srp.rank.mod allow
+    ```
+  </Step>
+
+  <Step title="Set up Discord (optional)">
+    ```cfg
+    set srp-reports:webhook:player   "https://discord.com/api/webhooks/..."
+    set srp-reports:webhook:bug      "https://discord.com/api/webhooks/..."
+    set srp-reports:webhook:question "https://discord.com/api/webhooks/..."
+    set srp-reports:webhook:alerts   "https://discord.com/api/webhooks/..."
+    set srp-reports:alertRoleId      "123456789012345678"
+    ```
+  </Step>
+</Steps>
+
+<Callout type="warning">
+  Use `set` for webhooks, never `setr`. Replicated convars are readable by every
+  client.
+</Callout>
+
+## Commands
+
+<Properties>
+  <Property name="/report" type="player">
+    Create a report, or reopen the chat of your active report.
+  </Property>
+  <Property name="/reports" type="staff">
+    Open the staff panel. Players without the configured rank get a "no access"
+    notification.
+  </Property>
+  <Property name="LALT" type="keybind">
+    Gives the mouse back to the staff panel after "Unfocus NUI". Rebind it under
+    Settings → Key Bindings → FiveM.
+  </Property>
+</Properties>
+
+## Configuration
+
+### Convars
+
+<Properties>
+  <Property name="srp-reports:webhook:player" type="string">
+    Transcript of closed **player** reports. Empty = off.
+  </Property>
+  <Property name="srp-reports:webhook:bug" type="string">
+    Transcript of closed **bug** reports.
+  </Property>
+  <Property name="srp-reports:webhook:question" type="string">
+    Transcript of closed **question** reports.
+  </Property>
+  <Property name="srp-reports:webhook:alerts" type="string">
+    "Many unclaimed reports" alerts and reminders to staff who claimed a report.
+  </Property>
+  <Property name="srp-reports:alertRoleId" type="string">
+    Discord role pinged in the unclaimed-reports alert.
+  </Property>
+</Properties>
+
+### config.js
+
+<Properties>
+  <Property name="staffRank" type="string" defaultValue="'jrmod'">
+    Minimum srp-core rank for `/reports`.
+  </Property>
+  <Property name="reportTypes" type="string[]" defaultValue="['speler', 'vraag', 'bug']">
+    Allowed report categories. Must match the options in the UI.
+  </Property>
+  <Property name="maxSubjectLength / maxMessageLength" type="number" defaultValue="100 / 2000">
+    Longer input is rejected.
+  </Property>
+  <Property name="unclaimedAlertThreshold" type="number" defaultValue="12">
+    Discord alert once this many reports are open and unclaimed.
+  </Property>
+  <Property name="unclaimedAlertCooldownMinutes" type="number" defaultValue="15">
+    Minimum time between two alerts.
+  </Property>
+  <Property name="quietHours" type="{ from, to }" defaultValue="{ from: 2, to: 8 }">
+    No unclaimed alerts between these hours (server time).
+  </Property>
+  <Property name="reminderNoReplyMinutes" type="number" defaultValue="10">
+    Remind the claiming staff member when they have not replied yet.
+  </Property>
+  <Property name="reminderCloseMinutes" type="number" defaultValue="15">
+    Remind them to close a report when they replied last.
+  </Property>
+</Properties>
+
+### Language
+
+Texts live in `locales/nl.json` and `locales/en.json`. The language follows
+srp-core:
+
+```cfg
+setr srp-core:locale "en"
+```
+
+## Notes
+
+- Reports are kept in memory. Restarting the resource clears open reports.
+- Players are tracked by the srp-core main identifier (`license` by default).
+
+## Changelog
+
+<Changelog>
+  <Release version="1.1.0" date="2026-10-05">
+    <Change kind="changed">Plain JS resource, no build step needed to run it.</Change>
+    <Change kind="changed">Uses the srp-core import for notify, locale, identifier and ranks.</Change>
+    <Change kind="added">English and Dutch locales.</Change>
+    <Change kind="added">Webhooks and alert role configurable through convars.</Change>
+    <Change kind="fixed">Players can only post in and close their own report.</Change>
+    <Change kind="fixed">Player text is escaped in the Discord HTML transcript.</Change>
+    <Change kind="removed">ESX dependency, srp-admin, fp-vantage and profile pictures.</Change>
+    <Change kind="removed">Steam requirement: any player with a license can report.</Change>
+  </Release>
+</Changelog>

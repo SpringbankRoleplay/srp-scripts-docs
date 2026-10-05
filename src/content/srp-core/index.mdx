@@ -51,19 +51,45 @@ need to edit any file inside the resource.
 ### Convars
 
 <Properties>
-  <Property name="srp-core:bridge.target" type="string" defaultValue="'ox'">
+  <Property name="srp-core.bridge.target" type="string" defaultValue="'ox'">
     Targeting bridge. Accepts `ox`.
   </Property>
 
-  <Property name="srp-core:bridge.notify" type="string" defaultValue="'ox'">
+  <Property name="srp-core.bridge.notify" type="string" defaultValue="'ox'">
     Notification bridge. Accepts `ox` or `esx`.
+  </Property>
+
+  <Property name="srp-core:locale" type="string" defaultValue="'nl'">
+    Language every SRP resource uses for its texts. Missing keys fall back to
+    English. See [sCore.locale](/srp-core/import/shared/#scorelocale).
+  </Property>
+
+  <Property name="srp-core:mainIdentifier" type="string" defaultValue="'license'">
+    Identifier type used as the player key (`license`, `steam`, `discord`,
+    `fivem`, ...). Server only, so `set` is enough. See
+    [sCore.identifier](/srp-core/import/server/#scoreidentifier).
   </Property>
 </Properties>
 
 ```bash
-setr srp-core:bridge.target "ox"
-setr srp-core:bridge.notify "esx"
+setr srp-core.bridge.target "ox"
+setr srp-core.bridge.notify "esx"
+setr srp-core:locale "nl"
+set  srp-core:mainIdentifier "license"
 ```
+
+### Staff ranks
+
+Ranks are granted through ACE: `srp.rank.<rank>`. A higher rank counts as every
+rank below it.
+
+```bash
+add_ace group.mod   srp.rank.mod   allow
+add_ace group.admin srp.rank.admin allow
+```
+
+The default ranks, lowest first, are `jrmod`, `mod`, `srmod`, `admin` and
+`owner`. See [sCore.ranks](/srp-core/import/server/#scoreranks).
 
 <Callout type="warning">
   Use `setr`, not `set`. Bridges are resolved on both the client and the server,
