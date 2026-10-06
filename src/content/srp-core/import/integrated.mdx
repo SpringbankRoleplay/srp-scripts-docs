@@ -167,6 +167,41 @@ Consumers call it the usual way:
 local license = exports['srp-core']:getPlayerLicense(source)
 ```
 
+## SafeExport <Badge variant="shared">shared</Badge>
+
+Calls another resource's export without ever throwing. Use it whenever the other
+resource might not be running, or might fail.
+
+<Properties>
+  <Property name="resource" type="string" required>
+    The resource that owns the export.
+  </Property>
+  <Property name="exportName" type="string" required>
+    The export to call.
+  </Property>
+  <Property name="..." type="any">
+    Arguments, passed through unchanged.
+  </Property>
+</Properties>
+
+```lua
+local count = SafeExport('ox_inventory', 'GetItemCount', source, 'water') or 0
+```
+
+It is the same as `exports.ox_inventory:GetItemCount(source, 'water')`, with
+two differences:
+
+- the resource is not started → returns `nil` and logs a warning
+- the export errors → returns `nil` and logs the error
+
+Each `resource:export` pair logs once until it works again, so a call in a loop
+won't flood the console. Every srp-core bridge uses `SafeExport` internally.
+
+<Callout type="info">
+  `nil` can also be a normal return value. When that matters, check
+  `GetResourceState(resource)` yourself first.
+</Callout>
+
 ## TriggerClientEvent <Badge variant="server">server</Badge>
 
 On the server, Integrated replaces the native `TriggerClientEvent` with a

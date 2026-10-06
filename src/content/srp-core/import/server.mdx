@@ -20,6 +20,115 @@ sCore.notify(-1, { description = 'Restart in 5 minutes.' })
 sCore.notify(source, { title: 'Shop', description: 'Purchase complete', type: 'success' });
 ```
 
+## sCore.inventory <Badge variant="server">server</Badge>
+
+One item API for every supported inventory. The functions are the same for
+every bridge, so your resource never needs to know which inventory the server
+runs.
+
+```lua
+if sCore.inventory.canCarryItem(source, 'water', 2) then
+    sCore.inventory.addItem(source, 'water', 2)
+end
+
+if sCore.inventory.removeItem(source, 'lockpick', 1) then
+    -- ...
+end
+```
+
+<Properties>
+  <Property name="getItemCount(source, item)" type="function">Returns a number.</Property>
+  <Property name="hasItem(source, item, count?)" type="function">`true` when the player has at least `count` (default 1).</Property>
+  <Property name="addItem(source, item, count, metadata?)" type="function">Returns `true` on success.</Property>
+  <Property name="removeItem(source, item, count, metadata?)" type="function">Returns `true` on success.</Property>
+  <Property name="canCarryItem(source, item, count)" type="function">Weight and slot check.</Property>
+  <Property name="getItemLabel(item)" type="function">Display name, or `nil`.</Property>
+  <Property name="registerUsableItem(item, cb)" type="function">
+    `cb(source, item)` runs when a player uses the item.
+  </Property>
+</Properties>
+
+### Bridge support
+
+| Function | ox | qs | codem | esx |
+|---|---|---|---|---|
+| getItemCount / hasItem | ✓ | ✓ | ✓ | ✓ |
+| addItem / removeItem | ✓ | ✓ | ✓ | ✓ |
+| metadata | ✓ | ✓ | add only | ✗ |
+| canCarryItem | ✓ | ✓ | ✗ | ✓ |
+| getItemLabel | ✓ | ✓ | ✓ | ✓ |
+| registerUsableItem | ✓ (see below) | ✓ | ✗ | ✓ |
+
+An unsupported function logs a warning and returns `nil`.
+
+<Callout type="warning" title="Usable items with ox_inventory">
+  ox_inventory only runs code for items that point to an export. Add this to the
+  item in `ox_inventory/data/items.lua`:
+
+  ```lua
+  ['bandage'] = {
+      label = 'Bandage',
+      server = { export = 'your-resource.bandage' },
+  },
+  ```
+
+  `registerUsableItem('bandage', cb)` creates that export in your resource.
+  Return `false` from `cb` to cancel the use.
+</Callout>
+
+<Callout type="info">
+  qs-inventory, codem-inventory and older ESX versions don't document what
+  `addItem`/`removeItem` return. For those bridges srp-core only reports failure
+  when the inventory explicitly returns `false`.
+</Callout>
+
+## sCore.phone <Badge variant="server">server</Badge>
+
+Messages, mail and notifications to a player's phone.
+
+```lua
+local number = sCore.phone.getPhoneNumber(source)
+
+sCore.phone.sendMessage(source, 'Mechanic', 'Your car is ready.')
+
+sCore.phone.sendMail(source, {
+    sender  = 'city@hall.gov',
+    subject = 'Permit approved',
+    message = 'Your business permit has been approved.',
+})
+
+sCore.phone.sendNotification(source, {
+    app         = 'Mail',
+    title       = 'Garage',
+    description = 'Vehicle stored',
+})
+```
+
+<Properties>
+  <Property name="getPhoneNumber(source)" type="function">The player's number, or `nil`.</Property>
+  <Property name="sendMessage(source, sender, message)" type="function">
+    SMS from `sender` (a number or name).
+  </Property>
+  <Property name="sendMail(source, { sender?, subject, message })" type="function">E-mail to the player.</Property>
+  <Property name="sendNotification(source, { app?, title, description })" type="function">
+    Push notification on the phone.
+  </Property>
+</Properties>
+
+### Bridge support
+
+| Function | lb | qs | npwd |
+|---|---|---|---|
+| getPhoneNumber | ✓ | ✓ | ✓ |
+| sendMessage | ✓ | ✓ (shown as app message) | ✓ |
+| sendMail | ✓ | ✓ (no `sender`) | ✗ |
+| sendNotification | ✓ (`app` required) | ✓ | ✗ |
+
+<Callout type="warning">
+  lb-phone needs `app` in `sendNotification`: the identifier of an app that
+  exists on the phone, such as `"Mail"`. Without it nothing is sent.
+</Callout>
+
 ## sCore.identifier <Badge variant="server">server</Badge>
 
 One identifier type for every SRP resource, so player data lines up across

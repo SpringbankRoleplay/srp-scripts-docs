@@ -22,7 +22,8 @@ sCore.notify({
   <Property name="title" type="string">Heading of the notification.</Property>
   <Property name="description" type="string">Body text.</Property>
   <Property name="type" type="string" defaultValue="'info'">
-    `success`, `error`, `inform`, `warning`, ... Passed to the bridge as-is.
+    `success`, `error`, `inform`/`info` or `warning`. Each bridge maps these to
+    its own types; mythic_notify has no warning style and shows it as `inform`.
   </Property>
   <Property name="duration" type="number" defaultValue="5000">Milliseconds.</Property>
   <Property name="position" type="string" defaultValue="'top-right'">
@@ -31,6 +32,38 @@ sCore.notify({
   </Property>
   <Property name="icon" type="string">Icon name (ox bridge only).</Property>
 </Properties>
+
+<Callout type="info">
+  mythic_notify shows a single line: `title: description`.
+</Callout>
+
+## sCore.inventory <Badge variant="client">client</Badge>
+
+Read-only item checks for the local player. Changing items is server-only, see
+[sCore.inventory on the server](/srp-core/import/server/#scoreinventory).
+
+```lua
+if sCore.inventory.hasItem('lockpick') then
+    -- ...
+end
+
+local water = sCore.inventory.getItemCount('water')
+```
+
+<Properties>
+  <Property name="getItemCount(item)" type="function">
+    How many of `item` the player has.
+  </Property>
+  <Property name="hasItem(item, count?)" type="function">
+    `true` when the player has at least `count` (default 1).
+  </Property>
+</Properties>
+
+<Callout type="warning">
+  codem-inventory has no documented client export for item counts. With the
+  `codem` bridge both functions log a warning and return `nil`/`false`. Check
+  items on the server instead.
+</Callout>
 
 ## sCore.target <Badge variant="client">client</Badge>
 

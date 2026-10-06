@@ -55,8 +55,18 @@ need to edit any file inside the resource.
     Targeting bridge. Accepts `ox`.
   </Property>
 
-  <Property name="srp-core.bridge.notify" type="string" defaultValue="'ox'">
-    Notification bridge. Accepts `ox` or `esx`.
+  <Property name="srp-core.bridge.notify" type="string" defaultValue="auto">
+    Notification bridge. Accepts `okok` (okokNotify), `mythic` (mythic_notify),
+    `ox` or `esx`.
+  </Property>
+
+  <Property name="srp-core.bridge.inventory" type="string" defaultValue="auto">
+    Inventory bridge. Accepts `ox` (ox_inventory), `qs` (qs-inventory), `codem`
+    (codem-inventory) or `esx` (ESX default inventory).
+  </Property>
+
+  <Property name="srp-core.bridge.phone" type="string" defaultValue="auto">
+    Phone bridge. Accepts `lb` (lb-phone), `qs` (qs-smartphone) or `npwd`.
   </Property>
 
   <Property name="srp-core:locale" type="string" defaultValue="'nl'">
@@ -103,8 +113,31 @@ The default ranks, lowest first, are `jrmod`, `mod`, `srmod`, `admin` and
   Check the console on boot if a bridge is not behaving as configured.
 </Callout>
 
-Omit a convar entirely to use its default. There is no reason to set one to the
-value it already has.
+### Auto-detection
+
+Leave a bridge convar out and srp-core picks the first supported resource that
+is running, in this order:
+
+| Module | Detection order |
+|---|---|
+| `notify` | okokNotify → mythic_notify → ox_lib → es_extended |
+| `inventory` | ox_inventory → qs-inventory → codem-inventory → es_extended |
+| `phone` | lb-phone → qs-smartphone → npwd |
+| `target` | ox_target |
+
+The console shows what was picked on startup:
+
+```
+[srp-core] [INFO] module "inventory": detected bridge "qs"
+```
+
+Set the convar only when you want something other than the detected bridge, for
+example `ox` notifications on a server that also runs okokNotify.
+
+<Callout type="warning">
+  Detection only sees resources that are already running. Start srp-core
+  **after** your inventory, phone and notify resources.
+</Callout>
 
 ### Debugging
 
