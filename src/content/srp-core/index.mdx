@@ -18,7 +18,7 @@ description: The bridge every SRP resource depends on.
 </ResourceHeader>
 
 <Compatibility
-  frameworks={[{ name: 'ESX' }, { name: 'Standalone' }]}
+  frameworks={[{ name: 'ESX' }, { name: 'Qbox' }, { name: 'Standalone' }]}
   inventories={[
     { name: 'ox_inventory' },
     { name: 'qs-inventory' },
@@ -78,8 +78,9 @@ documented export for them. See the support tables under
 ## Configuration
 
 Bridges, language and identifier are configured through convars in
-`server.cfg`. You should not need to edit any file inside the resource, except
-the rank list (see [Staff ranks](#staff-ranks)).
+`server.cfg`. For anything the convars don't cover, srp-core is open source:
+change it directly. [Customizing](/srp-core/customizing) shows how to add your
+own notify, inventory or phone system, or a whole new module.
 
 ### Convars
 
@@ -98,18 +99,22 @@ the rank list (see [Staff ranks](#staff-ranks)).
     (codem-inventory) or `esx` (ESX default inventory).
   </Property>
 
+  <Property name="srp-core.bridge.framework" type="string" defaultValue="auto">
+    Framework for player jobs and the `srp-core:framework:*` events. Accepts `qbox` (qbx_core) or `esx`.
+  </Property>
+
   <Property name="srp-core.bridge.phone" type="string" defaultValue="auto">
     Phone bridge. Accepts `lb` (lb-phone), `qs` (qs-smartphone) or `npwd`.
   </Property>
 
   <Property name="srp-core:locale" type="string" defaultValue="'nl'">
     Language every SRP resource uses for its texts. Missing keys fall back to
-    English. See [sCore.locale](/srp-core/import/shared/#scorelocale).
+    English. See [sCore.locale](/srp-core/import/shared/#scorelocale-shared).
   </Property>
 
   <Property name="srp-core:mainIdentifier" type="string" defaultValue="'license'">
     Identifier type used as the player key (`license`, `steam`, `discord`,
-    `fivem`, ...). See [sCore.identifier](/srp-core/import/server/#scoreidentifier).
+    `fivem`, ...). See [sCore.identifier](/srp-core/import/server/#scoreidentifier-server).
   </Property>
 </Properties>
 
@@ -143,6 +148,7 @@ is running, in this order:
 |---|---|---|
 | `notify` | okokNotify → mythic_notify → ox_lib → es_extended | `ox` |
 | `inventory` | ox_inventory → qs-inventory → codem-inventory → es_extended | `ox` |
+| `framework` | qbx_core → es_extended | none (no jobs or framework events, with a warning) |
 | `phone` | lb-phone → qs-smartphone → npwd | none (phone calls are skipped with a warning) |
 | `target` | ox_target | `ox` |
 
@@ -168,7 +174,7 @@ add_principal identifier.license:abc123 group.admin
 The default ranks, lowest first, are `jrmod`, `mod`, `srmod`, `admin` and
 `owner`. To use other names, change `Config.ranks` in `src/config/config.lua`,
 and keep a copy because updates overwrite it. See
-[sCore.ranks](/srp-core/import/server/#scoreranks).
+[sCore.ranks](/srp-core/import/server/#scoreranks-server).
 
 ### Debugging
 
@@ -186,8 +192,9 @@ setr srp-core:debug.srp-garage true
 See [Debug gating](/srp-core/import/integrated/#debug-gating) for narrowing this
 down further.
 
-<Callout type="warning">
-  `Config.bridgeSettings` in `config.lua` declares which bridges exist. Editing
-  it is not a supported way to configure your server, and your changes will be
-  overwritten on update. Use the convars above.
+<Callout type="info">
+  To switch between the bridges srp-core already ships, use the convars above,
+  not `config.lua`. Edit `config.lua` and the `imports/` files when you add
+  something new, as described in [Customizing](/srp-core/customizing). Updates
+  overwrite those files, so keep track of your changes.
 </Callout>

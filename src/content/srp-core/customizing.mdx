@@ -1,0 +1,189 @@
+---
+title: Customizing
+description: srp-core is open source. Add your own notify, inventory or phone system, or a whole new module.
+---
+
+# Customizing srp-core
+
+Our paid resources ship encrypted, but **srp-core is fully open source**. Every
+place where an SRP resource talks to another system (notifications, inventory,
+phone, targeting, ranks, identifiers) goes through srp-core. So if you run a
+system we don't support, or want something to behave differently, you change
+it here, once, and every SRP resource follows.
+
+<Callout type="info">
+  Updates replace the srp-core files. Keep track of what you changed (a fork
+  or a short changelog of your own), so you can apply it again after updating.
+  If your change is useful to others, send it to us as a pull request.
+</Callout>
+
+## How a module works
+
+Each module lives in `imports/<module>/` and has one file per side:
+
+```text
+srp-core/
+├── imports/
+│   ├── notify/client.lua       -- sCore.notify (client)
+│   ├── notify/server.lua       -- sCore.notify (server)
+│   ├── inventory/server.lua    -- sCore.inventory (server)
+│   ├── inventory/client.lua    -- sCore.inventory (client)
+│   └── phone/server.lua        -- sCore.phone
+└── src/config/config.lua       -- Config.bridgeSettings
+```
+
+The file runs **inside the resource that uses it**, the first time that
+resource touches `sCore.<module>`. It gets three values from the loader:
+
+```lua
+local moduleName, utils, context = ...  -- "notify", helpers, "client" | "server"
+```
+
+and picks its bridge with:
+
+```lua
+local bridge = utils.getPreferredBridge(moduleName, { "ox", "esx", "okok", "mythic" })
+```
+
+The list is the set of bridges this file implements. `getPreferredBridge`
+returns the convar value, else the first detected resource, else the default,
+but only if it is in that list.
+
+## Add a bridge to an existing module
+
+Example: your server uses a notify resource called `my_notify`, with a client
+export `Show(text, type, ms)`.
+
+<Steps>
+  <Step title="Register the bridge in config.lua">
+    Add it to `validBriges` (the position decides the detection priority) and
+    tell srp-core which resource to look for:
+
+    ```lua
+    -- src/config/config.lua
+    ["notify"] = {
+        validBriges    = { "mine", "okok", "mythic", "ox", "esx" },
+        defaultBridges = "ox",
+        detect = {
+            mine = "my_notify",
+            okok = "okokNotify", mythic = "mythic_notify", ox = "ox_lib", esx = "es_extended",
+        },
+    },
+    ```
+  </Step>
+
+  <Step title="Implement it">
+    Add `"mine"` to the supported list and write the implementation. It gets the
+    same `data` as every other bridge, so translate it to what your resource
+    expects:
+
+    ```lua
+    -- imports/notify/client.lua
+    local bridge = utils.getPreferredBridge(moduleName, { "ox", "esx", "okok", "mythic", "mine" })
+
+    impl.mine = function(data)
+        SafeExport('my_notify', 'Show', data.description or data.title, data.type or 'info', data.duration or 5000)
+    end
+    ```
+  </Step>
+
+  <Step title="Restart">
+    With `my_notify` running, the console shows:
+
+    ```
+    [srp-core] [INFO] module "notify": detected bridge "mine"
+    ```
+
+    Or force it with `setr srp-core.bridge.notify "mine"`.
+  </Step>
+</Steps>
+
+### Modules with several functions
+
+`inventory`, `phone` and `target` have one table per function. Add an entry per
+function your system supports:
+
+```lua
+-- imports/inventory/server.lua
+local bridge = utils.getPreferredBridge(moduleName, { "ox", "qs", "codem", "esx", "mine" })
+
+impl.getItemCount.mine = function(source, item)
+    return SafeExport('my_inventory', 'Count', source, item) or 0
+end
+
+impl.addItem.mine = function(source, item, count, metadata)
+    return SafeExport('my_inventory', 'Give', source, item, count, metadata) == true
+end
+```
+
+Functions you leave out log a "does not support" warning and return `nil`, so a
+partly implemented bridge still loads. The function list and
+what each must return are on [Server](/srp-core/import/server/#scoreinventory-server)
+and [Client](/srp-core/import/client/#scoreinventory-client).
+
+## Add a new module
+
+Example: `sCore.dispatch` for your dispatch system.
+
+<Steps>
+  <Step title="Create the file">
+    The folder name is the module name.
+
+    ```lua
+    -- imports/dispatch/server.lua
+    local moduleName, utils = ...
+    local bridge = utils.getPreferredBridge(moduleName, { "mine" })
+
+    local impl = { alert = {} }
+
+    impl.alert.mine = function(data)
+        SafeExport('my_dispatch', 'CreateAlert', data)
+    end
+
+    local module = {}
+    for name, implementations in pairs(impl) do
+        module[name] = implementations[bridge] or function()
+            print.warn('dispatch bridge `%s` does not support `%s`', bridge, name)
+        end
+    end
+
+    return module
+    ```
+
+    Use `client.lua`, `server.lua` or `shared.lua`. When both `shared.lua` and a
+    side file return a table, they are merged.
+  </Step>
+
+  <Step title="Add it to Config.bridgeSettings">
+    ```lua
+    ["dispatch"] = {
+        validBriges    = { "mine" },
+        defaultBridges = "",
+        detect         = { mine = "my_dispatch" },
+    },
+    ```
+  </Step>
+
+  <Step title="Use it">
+    ```lua
+    sCore.dispatch.alert({ code = '10-90', coords = GetEntityCoords(GetPlayerPed(source)) })
+    ```
+
+    No registration needed: the import loads `imports/dispatch/server.lua` the
+    first time the resource uses `sCore.dispatch`.
+  </Step>
+</Steps>
+
+## Rules that keep it working
+
+- **Call other resources through `SafeExport`.** A stopped or broken resource
+  then logs once and returns `nil` instead of crashing every SRP script.
+- **Keep the function names and return values.** SRP resources rely on them.
+  Translate inside the bridge, not in the resource.
+- **Warn, don't fake.** If your system can't do something, let the function log
+  and return `nil`, rather than returning `true`.
+- **Shared state goes in `src/`, not `imports/`.** Module files run once per
+  resource. Something that must exist only once (a net event handler, a cache)
+  belongs in srp-core's own `src/` scripts.
+- **Lua only.** Modules are Lua. JavaScript resources get the subset listed on
+  [Shared](/srp-core/import/shared/#loading-the-import).

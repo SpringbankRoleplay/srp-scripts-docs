@@ -1,0 +1,178 @@
+---
+title: srp-propplacing
+description: Government jobs place traffic cones, barriers, containers, spike strips and police tape from their inventory.
+---
+
+# srp-propplacing
+
+<ResourceHeader
+  version="1.1.0"
+  status="beta"
+>
+  Emergency and government jobs place props straight from an item: traffic
+  cones, crowd barriers, fences, a tent, work lights, a container, a portable
+  toilet and a spike strip. Police tape is stretched between two points you
+  pick. Everything is picked up again with the target eye.
+</ResourceHeader>
+
+<Compatibility
+  frameworks={[{ name: 'ESX' }, { name: 'Qbox' }]}
+  inventories={[
+    { name: 'ox_inventory' },
+    { name: 'qs-inventory' },
+    { name: 'ESX default' },
+    { name: 'codem-inventory', support: 'no' },
+  ]}
+  targets={[{ name: 'ox_target' }]}
+/>
+
+<Callout type="warning">
+  codem-inventory has no documented way to make items usable from another
+  resource, so the items can't be used with it.
+</Callout>
+
+## Installation
+
+<Steps>
+  <Step title="Drop the files on your server">
+    Extract into `resources/[srp]/srp-propplacing`. The `stream` folder holds the
+    tape, roll and crowd-barrier models, so keep it.
+  </Step>
+
+  <Step title="Add the items to your inventory">
+    The item names are the `itemName` values in `data/config.lua`, plus the tape
+    item `policetape`.
+
+    **ox_inventory:** copy the items from `INSTALLATION/ox_inv.MD` into
+    `ox_inventory/data/items.lua`. Each item needs `consume = 0` and
+    `server = { export = 'srp-propplacing.<item>' }`. ox_inventory only runs
+    code for items that point to an export, and without `consume = 0` it
+    removes the item a second time.
+
+    **qs-inventory / ESX:** add the items as usual. No extra settings needed.
+  </Step>
+
+  <Step title="Add it to server.cfg">
+    ```cfg
+    ensure ox_lib
+    ensure ox_target
+    ensure srp-core
+    ensure srp-propplacing
+    ```
+  </Step>
+</Steps>
+
+## How it works
+
+**Props:** use the item, aim where it should go, rotate with the arrow keys and
+press **E** to place it. **Backspace** cancels. Heavy props (barriers,
+container) block sprinting and jumping while you carry them. To pick a prop up,
+look at it with the target eye and choose *"&lt;name&gt; verwijderen"*. The item
+goes back into your inventory.
+
+**Tape:** use the tape item, press **E** on the first point and **E** on the
+second. Tape can be at most `MaxTapeDistance` meters long. Walk up to the tape
+and press **E** (rebindable under *Settings → Key Bindings → FiveM*) to pick it
+up.
+
+Only jobs listed in `AllowedGroups` can place and pick up props and tape.
+
+## Configuration
+
+Everything is in `data/config.lua`. This file is not encrypted.
+
+<Properties>
+  <Property name="Items" type="table">
+    Placeable props: `itemName`, `propName` (model), `label`, `freeze`, `heavy`
+    (no sprint/jump while carrying) and `placeInstant` (skip the walk-up
+    animation).
+  </Property>
+  <Property name="MaxPlaceDistance" type="number" defaultValue="15.0">
+    Max distance in meters between the player and a prop they place or pick up.
+  </Property>
+  <Property name="AllowedGroups" type="table">
+    Jobs that may place props. `['police'] = true` for any grade,
+    `['police'] = 2` for grade 2 and up. Uses
+    [srp-core framework](/srp-core/import/server/#scoreframework-server).
+  </Property>
+  <Property name="TapeItem" type="string" defaultValue="'policetape'">
+    Item that places tape.
+  </Property>
+  <Property name="MaxTapeDistance" type="number" defaultValue="20.0">
+    Max tape length in meters.
+  </Property>
+  <Property name="TapeJobStyle / DefaultTapeStyle" type="table / string">
+    Which tape a job gets. By default `defensie` gets the military tape and
+    everyone else the police tape.
+  </Property>
+  <Property name="TapeStyles" type="table">
+    Per style: the roll model held while placing, and the tape models by length.
+  </Property>
+  <Property name="SpikeStrip" type="table">
+    Events for a spike strip script, see below.
+  </Property>
+</Properties>
+
+### Spike strip events
+
+srp-propplacing only places the spike strip prop. Popping tires is up to your
+spike strip script. When a spike strip is placed or picked up, the server sends
+an event to **all clients**:
+
+| Config key | Default event | Arguments |
+|---|---|---|
+| `placedEvent` | `srp-propplacing:client:spikeStripPlaced` | `netId`, `coords` (vector3), `heading` |
+| `removedEvent` | `srp-propplacing:client:spikeStripRemoved` | `netId` |
+
+Listen to the default events in your spike strip script:
+
+```lua
+RegisterNetEvent('srp-propplacing:client:spikeStripPlaced', function(netId, coords, heading)
+    -- start popping tires near this strip
+end)
+
+RegisterNetEvent('srp-propplacing:client:spikeStripRemoved', function(netId)
+    -- stop
+end)
+```
+
+Or point the config to the events your script already uses:
+
+```lua
+SpikeStrip = {
+    itemName = 'spike_strip',
+    placedEvent = 'my_spikes:client:add',
+    removedEvent = 'my_spikes:client:remove',
+},
+```
+
+Set an event to `''` to turn it off.
+
+### Language
+
+Texts are in `locales/nl.json` and `locales/en.json`. The language follows
+srp-core (`setr srp-core:locale "en"`). Prop names in the remove option come
+from `label` in the config.
+
+## Exports (client)
+
+<Properties>
+  <Property name="getEntityFromNetworkId(netId)" type="function">Entity handle or `nil`.</Property>
+  <Property name="getNetworkIdFromEntity(entity)" type="function">Network id or `nil`.</Property>
+</Properties>
+
+## Changelog
+
+<Changelog>
+  <Release version="1.1.0" date="2026-10-07">
+    <Change kind="changed">Runs on srp-core: jobs, inventory, target and notifications work with every supported system.</Change>
+    <Change kind="changed">Tape style is picked by job (`TapeJobStyle`) instead of item metadata, so it works without ox_inventory.</Change>
+    <Change kind="changed">Spike strip events are renamed and configurable.</Change>
+    <Change kind="added">English and Dutch locales.</Change>
+    <Change kind="fixed">Props and tape can only be picked up if they exist and are nearby (no more free items).</Change>
+    <Change kind="fixed">The server picks the tape model; clients can no longer spawn any model.</Change>
+    <Change kind="fixed">Picking up tape no longer errors for ambulance, mechanic and echo.</Change>
+    <Change kind="fixed">The remove option on props works again after a resource restart.</Change>
+    <Change kind="fixed">"Tape placed" no longer shows when the tape was too long.</Change>
+  </Release>
+</Changelog>

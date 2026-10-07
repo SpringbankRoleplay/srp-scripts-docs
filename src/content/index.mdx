@@ -37,9 +37,9 @@ per inventory. Whatever you already run, it detects on startup and adapts.
 <Compatibility
   frameworks={[
     { name: 'ESX' },
+    { name: 'Qbox' },
     { name: 'Standalone' },
     { name: 'QBCore', support: 'no' },
-    { name: 'QBox', support: 'no' },
   ]}
   inventories={[
     { name: 'ox_inventory' },
@@ -113,6 +113,12 @@ per inventory. Whatever you already run, it detects on startup and adapts.
     href="/srp-reports"
     badge={<Badge variant="beta">beta</Badge>}
     description="Report system with a player chat, a staff panel and Discord transcripts."
+  />
+  <Card
+    title="srp-propplacing"
+    href="/srp-propplacing"
+    badge={<Badge variant="beta">beta</Badge>}
+    description="Cones, barriers, spike strips and police tape for government jobs."
   />
   {/* Add one Card per released resource */}
 </CardGrid>

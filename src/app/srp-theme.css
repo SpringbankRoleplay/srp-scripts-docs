@@ -98,13 +98,6 @@ kbd {
 }
 
 /* Actief: alleen tekstkleur en een dunne markering, geen gevuld blok */
-.dark .nextra-sidebar a[aria-current='true'],
-.dark .nextra-sidebar li.active > a {
-  background: transparent;
-  color: var(--color-srp-accent-hover);
-  font-weight: 500;
-  box-shadow: inset 2px 0 0 var(--color-srp-accent);
-}
 
 /* Onderbalk met theme-switcher */
 .dark .nextra-sidebar-footer {

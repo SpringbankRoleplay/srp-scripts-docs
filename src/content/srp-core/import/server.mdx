@@ -8,7 +8,7 @@ description: Server-side sCore modules — notifications, player identifiers and
 ## sCore.notify <Badge variant="server">server</Badge>
 
 Sends a notification to one player, several players or everyone. It uses the
-same fields as the [client version](/srp-core/import/client/#scorenotify).
+same fields as the [client version](/srp-core/import/client/#scorenotify-client).
 
 ```lua
 sCore.notify(source, { title = 'Shop', description = 'Purchase complete', type = 'success' })
@@ -152,6 +152,85 @@ local discord = sCore.identifier.get(source, 'discord') --> "discord:1234" or ni
 ```bash
 set srp-core:mainIdentifier "license"
 ```
+
+## sCore.framework <Badge variant="server">server</Badge>
+
+Player jobs and framework events, whatever framework the server runs.
+
+| Bridge | Framework |
+|---|---|
+| `qbox` | qbx_core |
+| `esx` | es_extended |
+
+```lua
+local job = sCore.framework.getJob(source)
+--> { name = 'police', label = 'Politie', grade = 2, gradeLabel = 'Agent', onDuty = true }
+
+if sCore.framework.hasJob(source, { police = true, ambulance = true }) then
+    -- ...
+end
+```
+
+<Properties>
+  <Property name="getJob(source)" type="function">
+    `{ name, label, grade, gradeLabel, onDuty }`, or `nil` when the player has
+    no job or no framework is running.
+  </Property>
+  <Property name="hasJob(source, jobs)" type="function">
+    `true` when the player's job matches `jobs`. See the formats below.
+  </Property>
+  <Property name="matches(job, jobs)" type="function">
+    Same check for a job table you already have.
+  </Property>
+  <Property name="normalizeJob(rawJob)" type="function">
+    Turns the framework's own job table into the format above.
+  </Property>
+</Properties>
+
+`jobs` can be written in several ways:
+
+```lua
+'police'                            -- one job
+{ 'police', 'ambulance' }           -- a list
+{ police = true, ambulance = true } -- a set (any grade)
+{ police = 2 }                      -- grade 2 and up
+```
+
+### Events
+
+srp-core translates the framework's own events into general ones, so your
+resource listens to the same events on ESX and Qbox:
+
+| Event | Arguments | ESX | Qbox |
+|---|---|---|---|
+| `srp-core:framework:onPlayerLoaded` | `source` | `esx:playerLoaded` | `QBCore:Server:PlayerLoaded` |
+| `srp-core:framework:onPlayerUnloaded` | `source` | `esx:playerLogout`, disconnect | `QBCore:Server:OnPlayerUnload`, disconnect |
+| `srp-core:framework:onJobUpdate` | `source, job, lastJob` | `esx:setJob` | `QBCore:Server:OnJobUpdate` |
+
+`job` and `lastJob` use the format above. Listen with the helpers, or with
+`AddEventHandler` directly:
+
+```lua
+sCore.framework.onJobUpdate(function(source, job, lastJob)
+    print(('%s is now %s'):format(source, job and job.name or 'unemployed'))
+end)
+
+sCore.framework.onPlayerLoaded(function(source) end)
+sCore.framework.onPlayerUnloaded(function(source) end)
+
+-- same thing:
+AddEventHandler('srp-core:framework:onJobUpdate', function(source, job, lastJob) end)
+```
+
+<Callout type="info">
+  `onPlayerUnloaded` fires once per player, even when both a logout and a
+  disconnect happen.
+</Callout>
+
+<Callout type="warning">
+  With no supported framework running, `getJob` logs a warning and returns
+  `nil` (so `hasJob` is `false`), and the events never fire.
+</Callout>
 
 ## sCore.ranks <Badge variant="server">server</Badge>
 

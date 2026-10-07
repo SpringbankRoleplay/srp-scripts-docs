@@ -37,10 +37,55 @@ sCore.notify({
   mythic_notify shows a single line: `title: description`.
 </Callout>
 
+## sCore.framework <Badge variant="client">client</Badge>
+
+The local player's job and framework events. Same job format and `jobs` rules
+as [the server version](/srp-core/import/server/#scoreframework-server).
+
+```lua
+local job = sCore.framework.getJob()
+
+if sCore.framework.hasJob({ police = true }) then
+    -- ...
+end
+
+sCore.framework.onJobUpdate(function(job, lastJob)
+    print(('job changed to %s'):format(job and job.name or 'none'))
+end)
+```
+
+<Properties>
+  <Property name="getJob()" type="function">`{ name, label, grade, gradeLabel, onDuty }` or `nil`.</Property>
+  <Property name="hasJob(jobs)" type="function">`true` when the job matches `jobs`.</Property>
+  <Property name="matches(job, jobs)" type="function">Same check for a job table you already have.</Property>
+  <Property name="onPlayerLoaded(cb)" type="function">`cb()` when the player has loaded in.</Property>
+  <Property name="onPlayerUnloaded(cb)" type="function">`cb()` when the player logs out (character switch).</Property>
+  <Property name="onJobUpdate(cb)" type="function">`cb(job, lastJob)` when the job changes.</Property>
+</Properties>
+
+### Events
+
+These are local client events, so every resource on the client can listen:
+
+| Event | Arguments | ESX | Qbox |
+|---|---|---|---|
+| `srp-core:framework:onPlayerLoaded` | none | `esx:playerLoaded` | `QBCore:Client:OnPlayerLoaded` |
+| `srp-core:framework:onPlayerUnloaded` | none | `esx:onPlayerLogout` | `QBCore:Client:OnPlayerUnload` |
+| `srp-core:framework:onJobUpdate` | `job, lastJob` | `esx:setJob` | `QBCore:Client:OnJobUpdate` |
+
+Qbox doesn't send the previous job, so srp-core keeps track of it and `lastJob`
+works on both frameworks.
+
+<Callout type="info">
+  `getJob` asks the framework every time it is called. In code that runs every
+  frame (for example a target's `canInteract`), keep your own copy and update it
+  with `onJobUpdate`.
+</Callout>
+
 ## sCore.inventory <Badge variant="client">client</Badge>
 
 Read-only item checks for the local player. Changing items is server-only, see
-[sCore.inventory on the server](/srp-core/import/server/#scoreinventory).
+[sCore.inventory on the server](/srp-core/import/server/#scoreinventory-server).
 
 ```lua
 if sCore.inventory.hasItem('lockpick') then
