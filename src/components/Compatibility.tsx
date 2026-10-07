@@ -11,16 +11,22 @@ export function Compatibility({
     frameworks = [],
     inventories = [],
     targets = [],
+    notify = [],
+    phones = [],
 }: {
     frameworks?: { name: string; support?: Support; note?: string }[]
     inventories?: { name: string; support?: Support; note?: string }[]
     targets?: { name: string; support?: Support; note?: string }[]
+    notify?: { name: string; support?: Support; note?: string }[]
+    phones?: { name: string; support?: Support; note?: string }[]
 }) {
     return (
         <div className="my-6 grid gap-3 sm:grid-cols-2">
             <Group title="Frameworks" items={frameworks} />
             <Group title="Inventories" items={inventories} />
             <Group title="Targets" items={targets} />
+            <Group title="Notifications" items={notify} />
+            <Group title="Phones" items={phones} />
         </div>
     )
 }

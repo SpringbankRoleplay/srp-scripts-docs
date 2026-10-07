@@ -144,8 +144,9 @@ Registers a function as an export of the current resource.
   <Property name="callback" type="function" required>
     The function to expose. Receives whatever arguments the caller passes.
   </Property>
-    <Property name="resource" type="string|table" optional>
-    The function to expose. Receives whatever arguments the caller passes.
+  <Property name="resource" type="string|table" optional>
+    Resource name (or list of names) to register the export under. Defaults to
+    the current resource.
   </Property>
 </Properties>
 

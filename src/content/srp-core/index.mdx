@@ -12,14 +12,36 @@ description: The bridge every SRP resource depends on.
   downloadUrl="https://github.com/SpringbankRoleplay/srp-core/releases/latest"
   githubUrl="https://github.com/SpringbankRoleplay/srp-core"
 >
-  Detects your framework and inventory on startup, then exposes one consistent
-  API to every other SRP resource. Install it once and forget about it.
+  Detects your inventory, phone and notification resources on startup, then
+  exposes one consistent API to every other SRP resource. Install it once and
+  forget about it.
 </ResourceHeader>
 
 <Compatibility
   frameworks={[{ name: 'ESX' }, { name: 'Standalone' }]}
-  inventories={[{ name: 'ox_inventory' }]}
+  inventories={[
+    { name: 'ox_inventory' },
+    { name: 'qs-inventory' },
+    { name: 'codem-inventory', support: 'partial' },
+    { name: 'ESX default' },
+  ]}
+  targets={[{ name: 'ox_target' }]}
+  notify={[
+    { name: 'ox_lib' },
+    { name: 'okokNotify' },
+    { name: 'mythic_notify' },
+    { name: 'ESX' },
+  ]}
+  phones={[
+    { name: 'lb-phone' },
+    { name: 'qs-smartphone' },
+    { name: 'npwd', support: 'partial' },
+  ]}
 />
+
+"Partial" means some functions are missing because that resource has no
+documented export for them. See the support tables under
+[Server](/srp-core/import/server/#bridge-support).
 
 ## Installation
 
@@ -29,29 +51,40 @@ description: The bridge every SRP resource depends on.
   </Step>
 
   <Step title="Add it to server.cfg">
-    srp-core has to start before any resource that depends on it.
+    srp-core starts **after** the resources it bridges to (so it can detect
+    them) and **before** any resource that uses it.
 
     ```cfg
     ensure ox_lib
+    ensure ox_target
+    ensure ox_inventory     # your inventory, phone and notify resources
+
     ensure srp-core
+
+    ensure srp-reports      # our resources
     ```
   </Step>
 
   <Step title="Restart">
-    Check the console on startup — srp-core prints which framework and
-    inventory it detected.
+    Check the console on startup. For every module without a convar, srp-core
+    prints the bridge it detected:
+
+    ```
+    [srp-core] [INFO] module "inventory": detected bridge "ox"
+    ```
   </Step>
 </Steps>
 
 ## Configuration
 
-Bridges are configured entirely through convars in `server.cfg`. You should not
-need to edit any file inside the resource.
+Bridges, language and identifier are configured through convars in
+`server.cfg`. You should not need to edit any file inside the resource, except
+the rank list (see [Staff ranks](#staff-ranks)).
 
 ### Convars
 
 <Properties>
-  <Property name="srp-core.bridge.target" type="string" defaultValue="'ox'">
+  <Property name="srp-core.bridge.target" type="string" defaultValue="auto">
     Targeting bridge. Accepts `ox`.
   </Property>
 
@@ -76,17 +109,50 @@ need to edit any file inside the resource.
 
   <Property name="srp-core:mainIdentifier" type="string" defaultValue="'license'">
     Identifier type used as the player key (`license`, `steam`, `discord`,
-    `fivem`, ...). Server only, so `set` is enough. See
-    [sCore.identifier](/srp-core/import/server/#scoreidentifier).
+    `fivem`, ...). See [sCore.identifier](/srp-core/import/server/#scoreidentifier).
   </Property>
 </Properties>
 
 ```bash
-setr srp-core.bridge.target "ox"
-setr srp-core.bridge.notify "esx"
+setr srp-core.bridge.notify "okok"
+setr srp-core.bridge.inventory "ox"
 setr srp-core:locale "nl"
 set  srp-core:mainIdentifier "license"
 ```
+
+<Callout type="warning">
+  Use `setr` for the bridge and locale convars. They are read on both the
+  client and the server, and a plain `set` convar is invisible to the client:
+  the client would silently use another bridge or language than the server.
+  `srp-core:mainIdentifier` is only read on the server, so `set` is enough.
+</Callout>
+
+<Callout type="info">
+  An unknown bridge value logs an error on startup, but does not stop the
+  resource: srp-core falls back to the detected bridge, or the default when
+  nothing is detected. Check the console if a bridge does not behave as
+  configured.
+</Callout>
+
+### Auto-detection
+
+Leave a bridge convar out and srp-core picks the first supported resource that
+is running, in this order:
+
+| Module | Detection order | Default when nothing is found |
+|---|---|---|
+| `notify` | okokNotify → mythic_notify → ox_lib → es_extended | `ox` |
+| `inventory` | ox_inventory → qs-inventory → codem-inventory → es_extended | `ox` |
+| `phone` | lb-phone → qs-smartphone → npwd | none (phone calls are skipped with a warning) |
+| `target` | ox_target | `ox` |
+
+Set the convar only when you want something other than the detected bridge,
+for example `ox` notifications on a server that also runs okokNotify.
+
+<Callout type="warning">
+  Detection only sees resources that are already running. Start srp-core
+  **after** your inventory, phone and notify resources.
+</Callout>
 
 ### Staff ranks
 
@@ -96,63 +162,32 @@ rank below it.
 ```bash
 add_ace group.mod   srp.rank.mod   allow
 add_ace group.admin srp.rank.admin allow
+add_principal identifier.license:abc123 group.admin
 ```
 
 The default ranks, lowest first, are `jrmod`, `mod`, `srmod`, `admin` and
-`owner`. See [sCore.ranks](/srp-core/import/server/#scoreranks).
-
-<Callout type="warning">
-  Use `setr`, not `set`. Bridges are resolved on both the client and the server,
-  and a non-replicated convar is invisible to the client — the bridge will
-  silently fall back to its default there while working correctly on the server.
-</Callout>
-
-<Callout type="info">
-  An unrecognised value logs a warning and falls back to the default rather than
-  erroring, so a typo in `server.cfg` will not stop the resource from starting.
-  Check the console on boot if a bridge is not behaving as configured.
-</Callout>
-
-### Auto-detection
-
-Leave a bridge convar out and srp-core picks the first supported resource that
-is running, in this order:
-
-| Module | Detection order |
-|---|---|
-| `notify` | okokNotify → mythic_notify → ox_lib → es_extended |
-| `inventory` | ox_inventory → qs-inventory → codem-inventory → es_extended |
-| `phone` | lb-phone → qs-smartphone → npwd |
-| `target` | ox_target |
-
-The console shows what was picked on startup:
-
-```
-[srp-core] [INFO] module "inventory": detected bridge "qs"
-```
-
-Set the convar only when you want something other than the detected bridge, for
-example `ox` notifications on a server that also runs okokNotify.
-
-<Callout type="warning">
-  Detection only sees resources that are already running. Start srp-core
-  **after** your inventory, phone and notify resources.
-</Callout>
+`owner`. To use other names, change `Config.ranks` in `src/config/config.lua`,
+and keep a copy because updates overwrite it. See
+[sCore.ranks](/srp-core/import/server/#scoreranks).
 
 ### Debugging
 
-To see which bridge was resolved for each kind at boot:
+The detected bridges are always printed on startup. To also see which modules
+each Lua resource loads, turn on debug output for that resource:
 
 ```bash
-setr srp-core:debug.srp-core true
+setr srp-core:debug.srp-garage true
 ```
 
-See [Debug gating](/srp-core/import/integrated/#debug-gating) for narrowing this to a
-single scope.
+```
+[srp-garage] [core] [DEBUG] loaded module "notify" (client)
+```
+
+See [Debug gating](/srp-core/import/integrated/#debug-gating) for narrowing this
+down further.
 
 <Callout type="warning">
-  `config.lua` exists for development of the resource itself — it declares which
-  bridge implementations are available to be selected. Editing it is not a
-  supported way to configure your server, and your changes will be overwritten
-  on update. Use the convars above.
+  `Config.bridgeSettings` in `config.lua` declares which bridges exist. Editing
+  it is not a supported way to configure your server, and your changes will be
+  overwritten on update. Use the convars above.
 </Callout>

@@ -22,9 +22,27 @@ dependency 'srp-core'
 shared_script '@srp-core/imports.js'
 ```
 
-Both give you the same `sCore` API. In Lua a module loads the first time you
-touch it (`sCore.locale`, `sCore.notify`, ...) and runs **inside your
-resource**, so anything it creates is cleaned up when your resource stops.
+In Lua a module loads the first time you touch it (`sCore.locale`,
+`sCore.notify`, ...) and runs **inside your resource**, so anything it creates
+is cleaned up when your resource stops.
+
+The JavaScript import covers a smaller set:
+
+| | Lua | JavaScript |
+|---|---|---|
+| `sCore.locale` | ✓ | ✓ |
+| `sCore.notify` | ✓ | ✓ |
+| `sCore.identifier`, `sCore.ranks` | ✓ server | ✓ server |
+| `sCore.inventory` | ✓ | ✗ |
+| `sCore.phone` | ✓ server | ✗ |
+| `sCore.target` | ✓ client | ✗ |
+| `SafeExport` | ✓ | ✓ |
+| `print.info` / `print.scope` / ... | ✓ | ✗ |
+
+<Callout type="info">
+  Loading `imports.lua` in a JavaScript resource does not help: it runs in that
+  resource's Lua runtime, and JavaScript cannot see Lua globals such as `sCore`.
+</Callout>
 
 <Callout type="info">
   Prefer `sCore` over calling `exports['srp-core']` directly. The import handles

@@ -3,7 +3,7 @@ title: Welcome
 description: Documentation for the FiveM resources by SRP Gaming.
 ---
 
-# SRP Scripts dada
+# SRP Scripts
 
 Resources for FiveM servers. Every script page here covers installation, the
 config options you can change, and the exports and events you can call.
@@ -43,9 +43,23 @@ per inventory. Whatever you already run, it detects on startup and adapts.
   ]}
   inventories={[
     { name: 'ox_inventory' },
+    { name: 'qs-inventory' },
+    { name: 'codem-inventory', support: 'partial' },
+    { name: 'ESX default' },
   ]}
   targets={[
     { name: 'ox_target' },
+  ]}
+  notify={[
+    { name: 'ox_lib' },
+    { name: 'okokNotify' },
+    { name: 'mythic_notify' },
+    { name: 'ESX' },
+  ]}
+  phones={[
+    { name: 'lb-phone' },
+    { name: 'qs-smartphone' },
+    { name: 'npwd', support: 'partial' },
   ]}
 />
 
@@ -63,11 +77,12 @@ per inventory. Whatever you already run, it detects on startup and adapts.
   </Step>
 
   <Step title="Add it to server.cfg">
-    Order matters. `ox_lib` and `srp-core` have to start before anything that
-    depends on them.
+    Order matters: your framework, inventory, phone and notify resources first,
+    then `srp-core` (so it can detect them), then our scripts.
 
     ```cfg
     ensure ox_lib
+    ensure ox_inventory     # or your inventory / phone / notify resources
     ensure srp-core
     ensure srp-yourscript
     ```
